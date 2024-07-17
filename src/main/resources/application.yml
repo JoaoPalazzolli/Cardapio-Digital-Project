@@ -11,7 +11,7 @@ eureka:
       defaultZone: ${EUREKA_URL}
 gateway:
   routes:
-    route1:
+    route-1:
       endpoint: ${ROUTE_1_ENDPOINT}
       uri: ${ROUTE_1_URI}
     route-2:
