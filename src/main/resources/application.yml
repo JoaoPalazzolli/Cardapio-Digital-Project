@@ -5,5 +5,5 @@ spring:
     name: eureka-service
 eureka:
   client:
-    register-with-eureka:
-    fetch-registry:
+    register-with-eureka: false
+    fetch-registry: false
