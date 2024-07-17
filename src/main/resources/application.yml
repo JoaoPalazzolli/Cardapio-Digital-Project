@@ -21,7 +21,6 @@ gateway:
       endpoint: ${ROUTE_3_ENDPOINT}
       uri: ${ROUTE_3_URI}
 
-
 --- # DEV
 spring:
   config:
