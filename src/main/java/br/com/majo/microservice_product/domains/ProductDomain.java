@@ -17,7 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Document(collection = "product")
+@Document(collection = "products")
 public class ProductDomain implements Serializable {
 
     @Serial
