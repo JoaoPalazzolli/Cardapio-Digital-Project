@@ -7,6 +7,7 @@ import br.com.majo.microservice_product.infra.exceptions.ProductAlreadyExistExce
 import br.com.majo.microservice_product.infra.exceptions.ProductNotFoundException;
 import br.com.majo.microservice_product.infra.message.producer.ProductProducer;
 import br.com.majo.microservice_product.infra.util.Mapper;
+import br.com.majo.microservice_product.infra.util.MethodType;
 import br.com.majo.microservice_product.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -55,7 +56,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<ProductDTO> createProduct(ProductDTO productDTO){
+    public ResponseEntity<ProductDTO> createProduct(String categoryId, ProductDTO productDTO){
 
         if(productAlreadyExist(productDTO.getName())){
             throw new ProductAlreadyExistException("This product already exist");
@@ -67,6 +68,7 @@ public class ProductService {
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
                 .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
 
+        producer.sendMessageToCategory(MethodType.CREATE, categoryId, dto);
         logger.info("Success created product");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -90,6 +92,7 @@ public class ProductService {
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
                 .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
 
+        producer.sendMessageToCategory(MethodType.UPDATE, dto);
         logger.info("Success updated product");
 
         return ResponseEntity.ok(dto);
@@ -103,6 +106,7 @@ public class ProductService {
 
         productRepository.delete(product);
 
+        producer.sendMessageToCategory(MethodType.DELETE, product);
         logger.info("Success deleted product");
 
         return ResponseEntity.noContent().build();
