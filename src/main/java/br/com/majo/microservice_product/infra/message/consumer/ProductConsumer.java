@@ -6,8 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.KafkaException;
 import org.springframework.stereotype.Component;
 
+import java.util.logging.Logger;
+
 @Component
 public class ProductConsumer {
+
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     @Autowired
     private ProductController productController;
@@ -15,9 +19,9 @@ public class ProductConsumer {
     @ProductListener(groupId = "${topic.product.consumer.group-id}")
     public void consumerProducts(String message){
         try{
-            System.out.println("Messagem " + message);
+            logger.info("Messagem: " + message);
         } catch (KafkaException e){
-            System.out.println("ERRO ao consumir kafka: " + e);
+            logger.info("Kafka Consumer Error: " + e.getMessage());
         }
     }
 }
