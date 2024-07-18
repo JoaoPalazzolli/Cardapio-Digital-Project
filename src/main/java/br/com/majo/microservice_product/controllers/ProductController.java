@@ -25,9 +25,10 @@ public class ProductController {
         return productService.findById(id);
     }
 
-    @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO){
-        return productService.createProduct(productDTO);
+    @PostMapping(value = "/{categoryId}")
+    public ResponseEntity<ProductDTO> createProduct(@PathVariable(value = "categoryId") String categoryId,
+                                                    @RequestBody ProductDTO productDTO){
+        return productService.createProduct(categoryId, productDTO);
     }
 
     @PutMapping(value = "/{id}")
