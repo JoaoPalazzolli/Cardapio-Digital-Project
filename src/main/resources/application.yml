@@ -8,7 +8,7 @@ spring:
       authentication-database: admin
       username: root
       password: admin
-      database: db-products
+      database: db-product
       port: 27017
       host: localhost
 eureka:
@@ -18,7 +18,7 @@ eureka:
 topic:
   product:
     consumer:
-      name: product.response.topic.v1
+      name: product-consumer.request.topic.v1
       group-id: majo
     producer:
-      name: product.request.topic.v1
+      name: product-producer.request.topic.v1
