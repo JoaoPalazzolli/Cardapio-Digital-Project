@@ -12,8 +12,8 @@ public interface ProductRepository extends MongoRepository<ProductDomain, String
     Optional<ProductDomain> findByName(String name);
 
     @Query("{ 'id': ?0 }")
-    @Update("{ '$set': { 'soldOff': ?1 }}")
-    void updateSoldOff(String id, boolean soldOff);
+    @Update("{ '$set': { 'soldOut': ?1 }}")
+    void updateSoldOut(String id, boolean soldOut);
 
     @Query("{ 'id': ?0}")
     @Update("{ '$set': { 'urlImage': ?1 }}")
