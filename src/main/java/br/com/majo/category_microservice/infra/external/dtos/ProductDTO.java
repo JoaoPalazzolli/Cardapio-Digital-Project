@@ -24,5 +24,5 @@ public class ProductDTO implements Serializable {
     private String description;
     private BigDecimal price;
     private String urlImage;
-    private Boolean soldOff;
+    private Boolean soldOut;
 }
