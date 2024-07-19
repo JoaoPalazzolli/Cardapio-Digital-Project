@@ -28,36 +28,40 @@ public class CategoryConsumer {
     @CategoryListener(groupId = "${topic.product.consumer.group-id}")
     public void consumerProducts(@Header(KafkaHeaders.RECEIVED_KEY) String methodType, Map<String, Object> data){
         try{
-            // CREATE, UPDATE, DELETE, UPDATE_SOLDOFF_STATUS, UPDATE_URL_IMAGE
+            // CREATE, UPDATE, DELETE, UPDATE_SOLD_OUT_STATUS, UPDATE_URL_IMAGE
 
             var id = data.getOrDefault("id", "").toString();
-            var product = Mapper.parseObject(data.get("product"), ProductDTO.class);
+            var object = data.get("object");
 
             switch (methodType){
                 case "CREATE":{
                     logger.info("product being added to the category");
 
-                    productService.addProductInCategory(id, product);
+                    productService.addProductInCategory(id, mappingObject(object, ProductDTO.class));
                     break;
                 }
                 case "UPDATE":{
                     logger.info("product being updated to the category");
 
-                    productService.updateProductInCategory(product);
+                    productService.updateProductInCategory(mappingObject(object, ProductDTO.class));
                     break;
                 }
                 case "DELETE":{
                     logger.info("product being deleted to the category");
 
-                    productService.deleteProductInCategory(product);
+                    productService.deleteProductInCategory(mappingObject(object, ProductDTO.class));
                     break;
                 }
-                case "UPDATE_SOLDOFF_STATUS":{
+                case "UPDATE_SOLD_OUT_STATUS":{
+                    logger.info("sold out status being updated to the category");
 
+                    productService.updateSoldOutStatusInCategory(id, mappingObject(object, Boolean.class));
                     break;
                 }
                 case "UPDATE_URL_IMAGE":{
+                    logger.info("url image being updated to the category");
 
+                    productService.updateUrlImageInCategory(id, mappingObject(object, String.class));
                     break;
                 }
                 default:{
@@ -69,6 +73,10 @@ public class CategoryConsumer {
         } catch (KafkaException e){
             logger.info("Kafka Consumer Error: " + e.getMessage());
         }
+    }
+
+    private <T> T mappingObject(Object object, Class<T> classType){
+        return Mapper.parseObject(object, classType);
     }
 
 }
