@@ -19,7 +19,7 @@ public class ProductConsumer {
     @ProductListener(groupId = "${topic.product.consumer.group-id}")
     public void consumerProducts(String message){
         try{
-            logger.info("Messagem: " + message);
+            logger.info(message);
         } catch (KafkaException e){
             logger.info("Kafka Consumer Error: " + e.getMessage());
         }
