@@ -9,6 +9,7 @@ import br.com.majo.microservice_product.infra.message.producer.ProductProducer;
 import br.com.majo.microservice_product.infra.util.Mapper;
 import br.com.majo.microservice_product.infra.util.MethodType;
 import br.com.majo.microservice_product.repositories.ProductRepository;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -25,7 +25,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Service
 public class ProductService {
 
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ProductProducer producer;
@@ -45,7 +45,7 @@ public class ProductService {
     }
 
     public ResponseEntity<ProductDTO> findById(String id){
-        logger.info("Finding product by id");
+        logger.info("Finding product by id. (product id: ({}))", id);
 
         var productDTO = Mapper.parseObject(productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found")), ProductDTO.class);
@@ -69,7 +69,7 @@ public class ProductService {
                 .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
 
         producer.sendMessageToCategory(MethodType.CREATE, categoryId, dto);
-        logger.info("Success created product");
+        logger.info("Success created product. (product id: ({}))", dto.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
@@ -82,7 +82,7 @@ public class ProductService {
 
         productDTO.setCreateAt(product.getCreateAt());
 
-        if(productAlreadyExist(productDTO.getName()) && !product.getName().equals(productDTO.getName())){
+        if(productAlreadyExist(productDTO.getName()) && !product.getName().equalsIgnoreCase(productDTO.getName())){
             throw new ProductAlreadyExistException("This product already exist");
         }
 
@@ -93,7 +93,7 @@ public class ProductService {
                 .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
 
         producer.sendMessageToCategory(MethodType.UPDATE, dto);
-        logger.info("Success updated product");
+        logger.info("Success updated product. (product id: ({}))", id);
 
         return ResponseEntity.ok(dto);
     }
@@ -107,17 +107,18 @@ public class ProductService {
         productRepository.delete(product);
 
         producer.sendMessageToCategory(MethodType.DELETE, product);
-        logger.info("Success deleted product");
+        logger.info("Success deleted product. (product id: ({}))", id);
 
         return ResponseEntity.noContent().build();
     }
 
     @Transactional
-    public ResponseEntity<?> updateSoldOff(String id, Boolean soldOff){
+    public ResponseEntity<?> updateSoldOut(String id, Boolean soldOut){
 
-        productRepository.updateSoldOff(id, soldOff);
+        productRepository.updateSoldOut(id, soldOut);
 
-        logger.info("success updated sold off status");
+        producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut);
+        logger.info("sold out status has been updated success. (product id: ({}))", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -127,7 +128,7 @@ public class ProductService {
 
         productRepository.updateUrlImage(id, urlImage);
 
-        logger.info("success updated url Image");
+        logger.info("url image has been updated success. (product id: ({}))", id);
 
         return ResponseEntity.noContent().build();
     }
