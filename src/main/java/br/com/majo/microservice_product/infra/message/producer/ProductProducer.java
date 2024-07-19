@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 public class ProductProducer {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Map<String, Object> data = new HashMap<>();
 
     @Autowired
     private NewTopic newTopic;
@@ -28,11 +29,10 @@ public class ProductProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendMessageToCategory(MethodType methodType, String categoryId, Object product){
+    public void sendMessageToCategory(MethodType methodType, String id, Object object){
         try{
-            Map<String, Object> data = new HashMap<>();
-            data.put("id", categoryId);
-            data.put("product", product);
+            data.put("id", id);
+            data.put("object", object);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException e){
@@ -42,10 +42,9 @@ public class ProductProducer {
         }
     }
 
-    public void sendMessageToCategory(MethodType methodType, Object product){
+    public void sendMessageToCategory(MethodType methodType, Object object){
         try{
-            Map<String, Object> data = new HashMap<>();
-            data.put("product", product);
+            data.put("object", object);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException e){
