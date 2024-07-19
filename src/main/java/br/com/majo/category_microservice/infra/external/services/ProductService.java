@@ -4,17 +4,18 @@ import br.com.majo.category_microservice.infra.exceptions.CategoryNotFoundExcept
 import br.com.majo.category_microservice.infra.external.dtos.ProductDTO;
 import br.com.majo.category_microservice.infra.message.producer.CategoryProducer;
 import br.com.majo.category_microservice.repositories.CategoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.logging.Logger;
 
 @Service
 public class ProductService {
 
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -38,8 +39,9 @@ public class ProductService {
 
         categoryRepository.save(category);
 
-        producer.sendMessageToProduct("Product success added to category");
-        logger.info("product success added to category");
+        producer.sendMessageToProduct(String
+                .format("Category Service Message: Product success added to category. (product id: (%s))", productDTO.getId()));
+        logger.info("product success added to category. (product id: ({}))", productDTO.getId());
     }
 
     public void updateProductInCategory(ProductDTO productDTO){
@@ -61,8 +63,9 @@ public class ProductService {
 
         categoryRepository.save(category);
 
-        producer.sendMessageToProduct("Product success updated to category");
-        logger.info("product success updated to category");
+        producer.sendMessageToProduct(String
+                .format("success updated product in category. (product id: (%s))", productDTO.getId()));
+        logger.info("success updated product in category. (product id: ({}))", productDTO.getId());
 
     }
 
@@ -81,8 +84,54 @@ public class ProductService {
 
         categoryRepository.save(category);
 
-        producer.sendMessageToProduct("Product success deleted to category");
-        logger.info("product success deleted to category");
+        producer.sendMessageToProduct(String
+                .format("success deleted product in category. (product id: (%s))", productDTO.getId()));
+        logger.info("success deleted product in category. (product id: ({}))", productDTO.getId());
 
+    }
+
+    public void updateSoldOutStatusInCategory(String productId, boolean soldOut){
+        var category = categoryRepository.findByProductId(productId)
+                .orElseThrow(() -> {
+                    producer.sendMessageToProduct("Category not found");
+                    return new CategoryNotFoundException("Category not found");
+                });
+
+        if(category.getProducts() == null){
+            throw new RuntimeException("There are no products in this category");
+        }
+
+        var product = category.getProducts().stream().filter(x -> x.getId().equals(productId)).toList().get(0);
+
+        product.setSoldOut(soldOut);
+
+        categoryRepository.save(category);
+
+        producer.sendMessageToProduct(String
+                .format("sold out status has been updated successfully. (product id: (%s))", productId));
+        logger.info("sold out status has been updated successfully. (product id: ({}))", productId);
+
+    }
+
+    public void updateUrlImageInCategory(String productId, String urlImage) {
+        var category = categoryRepository.findByProductId(productId)
+                .orElseThrow(() -> {
+                    producer.sendMessageToProduct("Category not found");
+                    return new CategoryNotFoundException("Category not found");
+                });
+
+        if(category.getProducts() == null){
+            throw new RuntimeException("There are no products in this category");
+        }
+
+        var product = category.getProducts().stream().filter(x -> x.getId().equals(productId)).toList().get(0);
+
+        product.setUrlImage(urlImage);
+
+        categoryRepository.save(category);
+
+        producer.sendMessageToProduct(String
+                .format("url image has been updated successfully. (product id: (%s))", productId));
+        logger.info("url image has been updated successfully. (product id: ({}))", productId);
     }
 }
