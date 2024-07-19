@@ -43,9 +43,9 @@ public class ProductController {
     }
 
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<?> updateSoldOff(@PathVariable(value = "id") String id,
-            @RequestParam(value = "soldOff", defaultValue = "false") Boolean soldOff){
-        return productService.updateSoldOff(id, soldOff);
+    public ResponseEntity<?> updateSoldOut(@PathVariable(value = "id") String id,
+            @RequestParam(value = "soldOut", defaultValue = "false") Boolean soldOut){
+        return productService.updateSoldOut(id, soldOut);
     }
 
 }

@@ -35,8 +35,8 @@ public class ProductDomain implements Serializable {
     @Field(name = "url_image")
     private String urlImage;
 
-    @Field(name = "sold_off")
-    private Boolean soldOff;
+    @Field(name = "sold_out")
+    private Boolean soldOut;
 
     private Date createAt;
 }
