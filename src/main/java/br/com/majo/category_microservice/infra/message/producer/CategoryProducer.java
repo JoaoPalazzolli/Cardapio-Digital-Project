@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -24,10 +25,13 @@ public class CategoryProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Value("${spring.application.name}")
+    private String fromMessage;
+
     public void sendMessageToProduct(String message){
 
         try{
-            kafkaTemplate.send(newTopic.name(), objectMapper.writeValueAsString(message));
+            kafkaTemplate.send(newTopic.name(), objectMapper.writeValueAsString(fromMessage + " message: " + message));
         } catch (KafkaException e){
             logger.info("Kafka produce error: " + e.getMessage());
         } catch (JsonProcessingException e) {
