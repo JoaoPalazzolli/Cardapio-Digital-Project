@@ -10,6 +10,6 @@ public interface CategoryRepository extends MongoRepository<CategoryDomain, Stri
 
     Optional<CategoryDomain> findByName(String name);
 
-    @Query("products._id: ?0 }")
+    @Query("{ 'products._id': ?0 }")
     Optional<CategoryDomain> findByProductId(String id);
 }
