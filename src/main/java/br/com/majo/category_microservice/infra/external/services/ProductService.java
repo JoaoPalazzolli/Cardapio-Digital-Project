@@ -33,7 +33,7 @@ public class ProductService {
 
         if (category.getProducts() == null){
             category.setProducts(Collections.singletonList(productDTO));
-        } else{
+        }else{
             category.getProducts().add(productDTO);
         }
 
@@ -44,16 +44,13 @@ public class ProductService {
         logger.info("product success added to category. (product id: ({}))", productDTO.getId());
     }
 
+    @Transactional
     public void updateProductInCategory(ProductDTO productDTO){
         var category = categoryRepository.findByProductId(productDTO.getId())
                 .orElseThrow(() -> {
                     producer.sendMessageToProduct("Category not found");
                     return new CategoryNotFoundException("Category not found");
                 });
-
-        if(category.getProducts() == null){
-            throw new RuntimeException("There are no products in this category");
-        }
 
         var product = category.getProducts().stream().filter(x -> x.getId().equals(productDTO.getId())).toList().get(0);
         var indexProduct = category.getProducts().indexOf(product);
@@ -69,16 +66,13 @@ public class ProductService {
 
     }
 
+    @Transactional
     public void deleteProductInCategory(ProductDTO productDTO){
         var category = categoryRepository.findByProductId(productDTO.getId())
                 .orElseThrow(() -> {
                     producer.sendMessageToProduct("Category not found");
                     return new CategoryNotFoundException("Category not found");
                 });
-
-        if(category.getProducts() == null){
-            throw new RuntimeException("There are no products in this category");
-        }
 
         category.getProducts().removeIf(x -> x.getId().equals(productDTO.getId()));
 
@@ -90,16 +84,13 @@ public class ProductService {
 
     }
 
+    @Transactional
     public void updateSoldOutStatusInCategory(String productId, boolean soldOut){
         var category = categoryRepository.findByProductId(productId)
                 .orElseThrow(() -> {
                     producer.sendMessageToProduct("Category not found");
                     return new CategoryNotFoundException("Category not found");
                 });
-
-        if(category.getProducts() == null){
-            throw new RuntimeException("There are no products in this category");
-        }
 
         var product = category.getProducts().stream().filter(x -> x.getId().equals(productId)).toList().get(0);
 
@@ -113,16 +104,13 @@ public class ProductService {
 
     }
 
+    @Transactional
     public void updateUrlImageInCategory(String productId, String urlImage) {
         var category = categoryRepository.findByProductId(productId)
                 .orElseThrow(() -> {
                     producer.sendMessageToProduct("Category not found");
                     return new CategoryNotFoundException("Category not found");
                 });
-
-        if(category.getProducts() == null){
-            throw new RuntimeException("There are no products in this category");
-        }
 
         var product = category.getProducts().stream().filter(x -> x.getId().equals(productId)).toList().get(0);
 
@@ -133,5 +121,33 @@ public class ProductService {
         producer.sendMessageToProduct(String
                 .format("url image has been updated successfully. (product id: (%s))", productId));
         logger.info("url image has been updated successfully. (product id: ({}))", productId);
+    }
+
+    @Transactional
+    public void updateProductCategory(String categoryId, ProductDTO productDTO){
+
+        var sourceCategory = categoryRepository.findByProductId(productDTO.getId())
+                .orElseThrow(() -> {
+                    producer.sendMessageToProduct("Category not found");
+                    return new CategoryNotFoundException("Category not found");
+                });
+
+        sourceCategory.getProducts().removeIf(x -> x.getId().equals(productDTO.getId()));
+
+        var targetCategory = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
+
+        if (targetCategory.getProducts() == null){
+            targetCategory.setProducts(Collections.singletonList(productDTO));
+        }else{
+            targetCategory.getProducts().add(productDTO);
+        }
+
+        categoryRepository.save(sourceCategory);
+        categoryRepository.save(targetCategory);
+
+        producer.sendMessageToProduct(String
+                .format("product category has been updated successfully. (product id: (%s))", productDTO.getId()));
+        logger.info("product category has been updated successfully. (product id: ({}))", productDTO.getId());
     }
 }

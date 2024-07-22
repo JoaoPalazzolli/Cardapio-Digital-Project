@@ -28,7 +28,7 @@ public class CategoryConsumer {
     @CategoryListener(groupId = "${topic.product.consumer.group-id}")
     public void consumerProducts(@Header(KafkaHeaders.RECEIVED_KEY) String methodType, Map<String, Object> data){
         try{
-            // CREATE, UPDATE, DELETE, UPDATE_SOLD_OUT_STATUS, UPDATE_URL_IMAGE
+            // CREATE, UPDATE, DELETE, UPDATE_SOLD_OUT_STATUS, UPDATE_URL_IMAGE, UPDATE_CATEGORY_ID
 
             var id = data.getOrDefault("id", "").toString();
             var object = data.get("object");
@@ -62,6 +62,12 @@ public class CategoryConsumer {
                     logger.info("url image being updated to the category");
 
                     productService.updateUrlImageInCategory(id, mappingObject(object, String.class));
+                    break;
+                }
+                case "UPDATE_CATEGORY_ID":{
+                    logger.info("product category being updated");
+
+                    productService.updateProductCategory(id, mappingObject(object, ProductDTO.class));
                     break;
                 }
                 default:{
