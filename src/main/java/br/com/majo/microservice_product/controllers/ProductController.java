@@ -25,10 +25,9 @@ public class ProductController {
         return productService.findById(id);
     }
 
-    @PostMapping(value = "/{categoryId}")
-    public ResponseEntity<ProductDTO> createProduct(@PathVariable(value = "categoryId") String categoryId,
-                                                    @RequestBody ProductDTO productDTO){
-        return productService.createProduct(categoryId, productDTO);
+    @PostMapping
+    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO){
+        return productService.createProduct(productDTO);
     }
 
     @PutMapping(value = "/{id}")
@@ -46,6 +45,12 @@ public class ProductController {
     public ResponseEntity<?> updateSoldOut(@PathVariable(value = "id") String id,
             @RequestParam(value = "soldOut", defaultValue = "false") Boolean soldOut){
         return productService.updateSoldOut(id, soldOut);
+    }
+
+    @PatchMapping(value = "/{productId}/{categoryId}")
+    public ResponseEntity<?> updateProductCategory(@PathVariable(value = "productId") String productId,
+                                           @PathVariable(value = "categoryId") String categoryId){
+        return productService.updateProductCategory(productId, categoryId);
     }
 
 }
