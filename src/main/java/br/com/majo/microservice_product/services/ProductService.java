@@ -56,7 +56,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<ProductDTO> createProduct(String categoryId, ProductDTO productDTO){
+    public ResponseEntity<ProductDTO> createProduct(ProductDTO productDTO){
 
         if(productAlreadyExist(productDTO.getName())){
             throw new ProductAlreadyExistException("This product already exist");
@@ -68,7 +68,7 @@ public class ProductService {
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
                 .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
 
-        producer.sendMessageToCategory(MethodType.CREATE, categoryId, dto);
+        producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto);
         logger.info("Success created product. (product id: ({}))", dto.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -86,6 +86,8 @@ public class ProductService {
             throw new ProductAlreadyExistException("This product already exist");
         }
 
+        productDTO.setCategoryId(product.getCategoryId());
+        productDTO.setUrlImage(product.getUrlImage());
         product = Mapper.parseObject(productDTO, ProductDomain.class);
         product.setId(id);
 
@@ -128,7 +130,23 @@ public class ProductService {
 
         productRepository.updateUrlImage(id, urlImage);
 
+        producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage);
         logger.info("url image has been updated success. (product id: ({}))", id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Transactional
+    public ResponseEntity<?> updateProductCategory(String productId, String categoryId){
+
+        var product = productRepository.findById(productId)
+                        .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        productRepository.updateCategoryId(productId, categoryId);
+
+        producer.sendMessageToCategory(MethodType.UPDATE_CATEGORY_ID, categoryId,
+                Mapper.parseObject(product, ProductDTO.class));
+        logger.info("category has been updated success. (product id: ({}))", productId);
 
         return ResponseEntity.noContent().build();
     }
