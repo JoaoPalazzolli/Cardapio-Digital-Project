@@ -25,4 +25,6 @@ public class ProductDTO extends RepresentationModel<ProductDTO> implements Seria
     private String urlImage;
     private Boolean soldOut;
     private Date createAt;
+
+    private String categoryId;
 }

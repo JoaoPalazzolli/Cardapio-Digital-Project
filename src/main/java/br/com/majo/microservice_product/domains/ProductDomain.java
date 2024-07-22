@@ -39,4 +39,6 @@ public class ProductDomain implements Serializable {
     private Boolean soldOut;
 
     private Date createAt;
+
+    private String categoryId;
 }
