@@ -2,7 +2,6 @@ package br.com.majo.gateway_service.infra.config;
 
 import br.com.majo.gateway_service.infra.utils.Routes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
