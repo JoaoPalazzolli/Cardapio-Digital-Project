@@ -1,29 +1,5 @@
-server:
-  port: ${PORT:8765}
-spring:
-  application:
-    name: api-gateway
-  profiles:
-    active: @profileActive@
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL}
-gateway:
-  routes:
-    route-1:
-      endpoint: ${ROUTE_1_ENDPOINT}
-      uri: ${ROUTE_1_URI}
-    route-2:
-      endpoint: ${ROUTE_2_ENDPOINT}
-      uri: ${ROUTE_2_URI}
-    route-3:
-      endpoint: ${ROUTE_3_ENDPOINT}
-      uri: ${ROUTE_3_URI}
-
---- # DEV
 spring:
   config:
-    activate:
-      on-profile: dev
-    import: optional:file:dev.env[.properties]
+    import: optional:configserver:http://localhost:8888
+  application:
+    name: gateway-service
