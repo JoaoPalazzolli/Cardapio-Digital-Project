@@ -25,8 +25,8 @@ public class CategoryConsumer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @CategoryListener(groupId = "${topic.product.consumer.group-id}")
-    public void consumerProducts(@Header(KafkaHeaders.RECEIVED_KEY) String methodType, Map<String, Object> data){
+    @CategoryListener(topics = "${topic.product.name}")
+    public void consumerFromProduct(@Header(KafkaHeaders.RECEIVED_KEY) String methodType, Map<String, Object> data){
         try{
             // CREATE, UPDATE, DELETE, UPDATE_SOLD_OUT_STATUS, UPDATE_URL_IMAGE, UPDATE_CATEGORY_ID
 
@@ -71,7 +71,6 @@ public class CategoryConsumer {
                     break;
                 }
                 default:{
-
                     break;
                 }
             }
