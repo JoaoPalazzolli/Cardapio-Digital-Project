@@ -21,3 +21,6 @@ spring:
       routes[2].id: upload-service
       routes[2].uri: lb://upload-service
       routes[2].predicates[0]: Path=/api/v1/upload/**
+      routes[3].id: restaurant-service
+      routes[3].uri: lb://restaurant-service
+      routes[3].predicates[0]: Path=/api/v1/restaurant/**
