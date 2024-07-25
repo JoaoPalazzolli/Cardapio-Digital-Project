@@ -16,9 +16,9 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
-      - mongo-data:/data
+      - mongo-data:/var/lib/mongodb
     networks:
-      - product-net
+      - mongo-net
 
   mongo-express:
     container_name: mongo-express-product
@@ -35,7 +35,7 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:admin@mongo:27017/
       ME_CONFIG_BASICAUTH: false
     networks:
-      - product-net
+      - mongo-net
 
   zookeeper:
     container_name: zookeeper
@@ -46,6 +46,7 @@ services:
       - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+
   kafka:
     depends_on:
       - zookeeper
@@ -63,11 +64,51 @@ services:
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
+  postgres:
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_SCHEMA}'" ]
+      timeout: 20s
+      interval: 5s
+      retries: 3
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: root
+      POSTGRES_DB: restaurant
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - postgres-net
+
+  pgadmin:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 81
+    ports:
+      - "81:81"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - postgres-net
+
 volumes:
   mongo-data:
+  postgres-data:
+  pgadmin-data:
 
 networks:
-  product-net:
+  mongo-net:
     driver: bridge
   kafka-net:
+    driver: bridge
+  postgres-net:
     driver: bridge
