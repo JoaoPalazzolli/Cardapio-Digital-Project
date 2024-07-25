@@ -1,5 +1,12 @@
 server:
   port: 8082
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
 upload:
   images:
     path: /home/joao/Desktop/Projetos Oficiais/Projeto - Cardapio Digital/services/upload-service/src/main/resources/static/images
