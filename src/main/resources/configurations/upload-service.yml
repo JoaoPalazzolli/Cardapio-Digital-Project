@@ -1,0 +1,5 @@
+server:
+  port: 8082
+upload:
+  images:
+    path: /home/joao/Desktop/Projetos Oficiais/Projeto - Cardapio Digital/services/upload-service/src/main/resources/static/images

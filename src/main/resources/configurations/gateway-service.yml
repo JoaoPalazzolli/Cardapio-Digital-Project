@@ -1,0 +1,23 @@
+server:
+  port: 8765
+logging:
+  level:
+    root: INFO
+  org:
+    springframework:
+      cloud:
+        gateway:
+          route:
+            RouteDefinitionLocator: INFO
+spring:
+  cloud:
+    gateway:
+      routes[0].id: product-service
+      routes[0].uri: lb://product-service
+      routes[0].predicates[0]: Path=/api/v1/product/**
+      routes[1].id: category-service
+      routes[1].uri: lb://category-service
+      routes[1].predicates[0]: Path=/api/v1/category/**
+      routes[2].id: upload-service
+      routes[2].uri: lb://upload-service
+      routes[2].predicates[0]: Path=/api/v1/upload/**
