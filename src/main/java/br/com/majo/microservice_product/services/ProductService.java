@@ -126,14 +126,12 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<?> updateUrlImage(String id, String urlImage){
+    public void updateUrlImage(String id, String urlImage){
 
         productRepository.updateUrlImage(id, urlImage);
 
         producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage);
         logger.info("url image has been updated success. (product id: ({}))", id);
-
-        return ResponseEntity.noContent().build();
     }
 
     @Transactional
