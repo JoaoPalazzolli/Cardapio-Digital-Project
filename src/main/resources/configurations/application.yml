@@ -10,6 +10,10 @@ spring:
       auto-offset-reset: earliest
     listener:
       missing-topics-fatal: false
+  jackson:
+    default-property-inclusion: NON_NULL
+    serialization:
+      fail-on-empty-beans: false
 
 topic:
   product:
@@ -21,3 +25,6 @@ topic:
   upload:
     name: upload.request.topic.v1
     group-id: upload-groupId
+  restaurant:
+    name: restaurant.request.topic.v1
+    group-id: restaurant-groupId
