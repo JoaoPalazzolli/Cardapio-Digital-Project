@@ -1,0 +1,30 @@
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+    listener:
+      missing-topics-fatal: false
+  jackson:
+    default-property-inclusion: NON_NULL
+    serialization:
+      fail-on-empty-beans: false
+
+topic:
+  product:
+    name: product.request.topic.v1
+    group-id: product-groupId
+  category:
+    name: category.request.topic.v1
+    group-id: category-groupId
+  upload:
+    name: upload.request.topic.v1
+    group-id: upload-groupId
+  restaurant:
+    name: restaurant.request.topic.v1
+    group-id: restaurant-groupId
