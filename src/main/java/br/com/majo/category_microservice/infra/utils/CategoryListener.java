@@ -14,9 +14,9 @@ import java.lang.annotation.Target;
 public @interface CategoryListener {
 
     @AliasFor(annotation = KafkaListener.class, attribute = "groupId")
-    String groupId() default "";
+    String groupId() default "${topic.category.group-id}";
 
     @AliasFor(annotation = KafkaListener.class, attribute = "topics")
-    String topics() default "${topic.product.producer.name}";
+    String topics() default "";
 
 }
