@@ -1,13 +1,13 @@
-package br.com.majo.category_microservice;
+package br.com.majo.microservice_product;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CategoryMicroserviceApplication {
+public class ProductServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CategoryMicroserviceApplication.class, args);
+		SpringApplication.run(ProductServiceApplication.class, args);
 	}
 
 }

@@ -11,7 +11,7 @@
 	<groupId>br.com.majo</groupId>
 	<artifactId>category-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>category-microservice</name>
+	<name>category-service</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>

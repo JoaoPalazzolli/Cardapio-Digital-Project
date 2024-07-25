@@ -1,10 +1,10 @@
-package br.com.majo.microservice_product;
+package br.com.majo.category_microservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MicroserviceProductApplicationTests {
+class CategoryServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

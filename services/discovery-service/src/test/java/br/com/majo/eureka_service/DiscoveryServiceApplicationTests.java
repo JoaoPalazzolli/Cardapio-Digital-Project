@@ -1,10 +1,10 @@
-package br.com.majo.gateway_service;
+package br.com.majo.eureka_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GatewayServiceApplicationTests {
+class DiscoveryServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -1,10 +1,10 @@
-package br.com.majo.eureka_service;
+package br.com.majo.microservice_product;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EurekaServiceApplicationTests {
+class ProductServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
