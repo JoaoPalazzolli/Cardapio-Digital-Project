@@ -9,4 +9,4 @@ spring:
       max-request-size: 215MB
 upload:
   images:
-    path: /home/joao/Desktop/Projetos Oficiais/Projeto - Cardapio Digital/services/upload-service/src/main/resources/static/images
+    path: /home/joao/Desktop/Projetos Oficiais/Cardapio Digital Project/services/upload-service/src/main/resources/static/images
