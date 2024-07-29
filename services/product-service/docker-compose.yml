@@ -76,7 +76,7 @@ services:
     environment:
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: root
-      POSTGRES_DB: restaurant
+      POSTGRES_DB: db-restaurant
     ports:
       - "5432:5432"
     volumes:
