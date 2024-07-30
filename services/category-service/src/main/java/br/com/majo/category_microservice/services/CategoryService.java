@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -52,7 +53,7 @@ public class CategoryService {
     @Transactional
     public ResponseEntity<CategoryDTO> createCategory(CategoryDTO categoryDTO) {
 
-        if(categoryAlreadyExist(categoryDTO.getName())){
+        if(categoryAlreadyExist(categoryDTO.getName(), categoryDTO.getRestaurantId())){
             throw new CategoryAlreadyExistException("This category already exist");
         }
 
@@ -72,14 +73,16 @@ public class CategoryService {
         var category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
 
-        if(categoryAlreadyExist(categoryDTO.getName()) && !categoryDTO.getName().equalsIgnoreCase(category.getName())){
+        if(categoryAlreadyExist(categoryDTO.getName(), category.getRestaurantId()) &&
+                !categoryDTO.getName().equalsIgnoreCase(category.getName())){
             throw new CategoryAlreadyExistException("This category already exist");
         }
 
+        categoryDTO.setRestaurantId(category.getRestaurantId());
         categoryDTO.setProducts(category.getProducts());
         categoryDTO.setCreateAt(category.getCreateAt());
+        categoryDTO.setId(id);
         category = Mapper.parseObject(categoryDTO, CategoryDomain.class);
-        category.setId(id);
 
         var dto = Mapper.parseObject(categoryRepository.save(category), CategoryDTO.class)
                 .add(linkTo(methodOn(CategoryController.class).findById(id)).withSelfRel());
@@ -101,7 +104,15 @@ public class CategoryService {
         return ResponseEntity.noContent().build();
     }
 
-    private Boolean categoryAlreadyExist(String name){
-        return categoryRepository.findByName(name).isPresent();
+    public ResponseEntity<List<CategoryDTO>> findAllByRestaurant(UUID restaurantId) {
+        var dtos = Mapper.parseListObject(categoryRepository.findAllByRestaurantId(restaurantId), CategoryDTO.class);
+
+        dtos.forEach(x -> x.add(linkTo(methodOn(CategoryController.class).findById(x.getId())).withSelfRel()));
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    private Boolean categoryAlreadyExist(String name, UUID restaurantId){
+        return categoryRepository.findByNameAndRestaurantId(name, restaurantId).isPresent();
     }
 }

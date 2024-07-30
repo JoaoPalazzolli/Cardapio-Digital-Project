@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/category")
@@ -18,6 +19,11 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<List<CategoryDTO>> findAll(){
         return categoryService.findAll();
+    }
+
+    @GetMapping(value = "/restaurant/{restaurantId}")
+    public ResponseEntity<List<CategoryDTO>> findAllByRestaurant(@PathVariable(value = "restaurantId") UUID restaurantId){
+        return categoryService.findAllByRestaurant(restaurantId);
     }
 
     @GetMapping(value = "/{id}")
