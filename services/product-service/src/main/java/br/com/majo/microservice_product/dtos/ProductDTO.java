@@ -7,6 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,4 +28,5 @@ public class ProductDTO extends RepresentationModel<ProductDTO> implements Seria
     private Date createAt;
 
     private String categoryId;
+    private UUID restaurantId;
 }
