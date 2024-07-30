@@ -26,11 +26,11 @@ public class RestaurantService {
     private RestaurantRepository restaurantRepository;
 
     public ResponseEntity<List<RestaurantDTO>> findAll() {
-        var restaurantsDTO = Mapper.parseListObject(restaurantRepository.findAll(), RestaurantDTO.class)
-                .stream().map(x -> x.add(linkTo(methodOn(RestaurantController.class)
-                        .findById(x.getId())).withSelfRel())).toList();
+        var dtos = Mapper.parseListObject(restaurantRepository.findAll(), RestaurantDTO.class);
 
-        return ResponseEntity.ok(restaurantsDTO);
+        dtos.forEach(x -> x.add(linkTo(methodOn(RestaurantController.class).findById(x.getId())).withSelfRel()));
+
+        return ResponseEntity.ok(dtos);
     }
 
     public ResponseEntity<RestaurantDTO> findById(UUID id){
