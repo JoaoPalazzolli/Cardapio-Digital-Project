@@ -5,11 +5,14 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ProductRepository extends MongoRepository<ProductDomain, String> {
 
-    Optional<ProductDomain> findByName(String name);
+    @Query("{ 'name': ?0, 'categoryId': ?1 }")
+    Optional<ProductDomain> findByNameAndCategoryId(String name, String categoryId);
 
     @Query("{ 'id': ?0 }")
     @Update("{ '$set': { 'soldOut': ?1 }}")
@@ -22,4 +25,7 @@ public interface ProductRepository extends MongoRepository<ProductDomain, String
     @Query("{ 'id': ?0}")
     @Update("{ '$set': { 'categoryId': ?1 }}")
     void updateCategoryId(String productId, String categoryId);
+
+    @Query("{ 'restaurantId': ?0 }")
+    List<ProductDomain> findAllByRestaurantId(UUID id);
 }
