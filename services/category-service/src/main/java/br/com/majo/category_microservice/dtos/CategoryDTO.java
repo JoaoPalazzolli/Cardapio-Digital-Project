@@ -8,6 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -23,5 +24,6 @@ public class CategoryDTO extends RepresentationModel<CategoryDTO> implements Ser
     private String name;
     private Date createAt;
 
+    private UUID restaurantId;
     private List<ProductDTO> products;
 }

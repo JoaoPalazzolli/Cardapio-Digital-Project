@@ -12,6 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -28,5 +29,6 @@ public class CategoryDomain implements Serializable {
     private String name;
     private Date createAt;
 
+    private UUID restaurantId;
     private List<ProductDTO> products;
 }
