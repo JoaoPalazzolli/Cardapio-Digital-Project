@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/product")
@@ -18,6 +19,11 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<ProductDTO>> findAll(){
         return productService.findAll();
+    }
+
+    @GetMapping(value = "/restaurant/{restaurantId}")
+    public ResponseEntity<List<ProductDTO>> findAllByRestaurant(@PathVariable(value = "restaurantId") UUID restaurantId){
+        return productService.findAllByRestaurant(restaurantId);
     }
 
     @GetMapping(value = "/{id}")

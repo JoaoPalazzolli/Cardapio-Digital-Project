@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -58,7 +59,7 @@ public class ProductService {
     @Transactional
     public ResponseEntity<ProductDTO> createProduct(ProductDTO productDTO){
 
-        if(productAlreadyExist(productDTO.getName())){
+        if(productAlreadyExist(productDTO.getName(), productDTO.getCategoryId())){
             throw new ProductAlreadyExistException("This product already exist");
         }
 
@@ -80,16 +81,16 @@ public class ProductService {
         var product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        productDTO.setCreateAt(product.getCreateAt());
-
-        if(productAlreadyExist(productDTO.getName()) && !product.getName().equalsIgnoreCase(productDTO.getName())){
+        if(productAlreadyExist(productDTO.getName(), product.getCategoryId()) && !product.getName().equalsIgnoreCase(productDTO.getName())){
             throw new ProductAlreadyExistException("This product already exist");
         }
 
+        productDTO.setCreateAt(product.getCreateAt());
+        productDTO.setRestaurantId(product.getRestaurantId());
         productDTO.setCategoryId(product.getCategoryId());
         productDTO.setUrlImage(product.getUrlImage());
+        productDTO.setId(id);
         product = Mapper.parseObject(productDTO, ProductDomain.class);
-        product.setId(id);
 
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
                 .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
@@ -149,7 +150,16 @@ public class ProductService {
         return ResponseEntity.noContent().build();
     }
 
-    private boolean productAlreadyExist(String name){
-        return productRepository.findByName(name).isPresent();
+    public ResponseEntity<List<ProductDTO>> findAllByRestaurant(UUID restaurantId) {
+        var dtos = Mapper.parseListObject(productRepository.findAllByRestaurantId(restaurantId), ProductDTO.class);
+
+        dtos.forEach((x -> x.add(linkTo(methodOn(ProductController.class)
+                .findById(x.getId())).withSelfRel())));
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    private boolean productAlreadyExist(String name, String categoryId){
+        return productRepository.findByNameAndCategoryId(name, categoryId).isPresent();
     }
 }
