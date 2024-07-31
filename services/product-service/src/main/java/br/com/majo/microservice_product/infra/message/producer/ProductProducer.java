@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @Component
@@ -29,10 +30,11 @@ public class ProductProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendMessageToCategory(MethodType methodType, String id, Object object){
+    public void sendMessageToCategory(MethodType methodType, String id, Object object, UUID restaurantId){
         try{
             data.put("id", id);
             data.put("object", object);
+            data.put("restaurantId", restaurantId);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException e){
@@ -42,9 +44,10 @@ public class ProductProducer {
         }
     }
 
-    public void sendMessageToCategory(MethodType methodType, Object object){
+    public void sendMessageToCategory(MethodType methodType, Object object, UUID restaurantId){
         try{
             data.put("object", object);
+            data.put("restaurantId", restaurantId);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException e){
