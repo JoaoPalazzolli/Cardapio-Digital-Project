@@ -14,18 +14,21 @@ public interface ProductRepository extends MongoRepository<ProductDomain, String
     @Query("{ 'name': ?0, 'categoryId': ?1 }")
     Optional<ProductDomain> findByNameAndCategoryId(String name, String categoryId);
 
-    @Query("{ 'id': ?0 }")
-    @Update("{ '$set': { 'soldOut': ?1 }}")
-    void updateSoldOut(String id, boolean soldOut);
+    @Query("{ 'id': ?0, 'restaurantId': ?1 }")
+    @Update("{ '$set': { 'soldOut': ?2 }}")
+    void updateSoldOut(String id, UUID restaurantId, boolean soldOut);
 
-    @Query("{ 'id': ?0}")
-    @Update("{ '$set': { 'urlImage': ?1 }}")
-    void updateUrlImage(String id, String urlImage);
+    @Query("{ 'id': ?0, 'restaurantId': ?1 }")
+    @Update("{ '$set': { 'urlImage': ?2 }}")
+    void updateUrlImage(String id, UUID restaurantId, String urlImage);
 
-    @Query("{ 'id': ?0}")
-    @Update("{ '$set': { 'categoryId': ?1 }}")
-    void updateCategoryId(String productId, String categoryId);
+    @Query("{ 'id': ?0, 'restaurantId': ?1 }")
+    @Update("{ '$set': { 'categoryId': ?2 }}")
+    void updateCategoryId(String productId, UUID restaurantId, String categoryId);
 
     @Query("{ 'restaurantId': ?0 }")
     List<ProductDomain> findAllByRestaurantId(UUID id);
+
+    @Query(" { 'id': ?0, 'restaurantId': ?1 } ")
+    Optional<ProductDomain> findByIdAndRestaurantId(String id, UUID restaurantId);
 }
