@@ -13,9 +13,12 @@ public interface CategoryRepository extends MongoRepository<CategoryDomain, Stri
     @Query(" { 'name': ?0, 'restaurantId': ?1 } ")
     Optional<CategoryDomain> findByNameAndRestaurantId(String name, UUID restaurantId);
 
-    @Query("{ 'products._id': ?0 }")
-    Optional<CategoryDomain> findByProductId(String id);
+    @Query("{ 'products._id': ?0, 'restaurantId': ?1 }")
+    Optional<CategoryDomain> findByProductIdAndRestaurantId(String id, UUID restaurantId);
 
     @Query(" { 'restaurantId': ?0 } ")
     List<CategoryDomain> findAllByRestaurantId(UUID restaurantId);
+
+    @Query(" { 'id': ?0, 'restaurantId': ?1 } ")
+    Optional<CategoryDomain> findByIdAndRestaurantId(String id, UUID restaurantId);
 }
