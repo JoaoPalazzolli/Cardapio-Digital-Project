@@ -12,6 +12,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @Component
@@ -32,42 +33,43 @@ public class CategoryConsumer {
 
             var id = data.getOrDefault("id", "").toString();
             var object = data.get("object");
+            var restaurantId = objectMapping(data.get("restaurantId"), UUID.class);
 
             switch (methodType){
                 case "CREATE":{
                     logger.info("product being added to the category");
 
-                    productService.addProductInCategory(id, mappingObject(object, ProductDTO.class));
+                    productService.addProductInCategory(id, objectMapping(object, ProductDTO.class), restaurantId);
                     break;
                 }
                 case "UPDATE":{
                     logger.info("product being updated to the category");
 
-                    productService.updateProductInCategory(mappingObject(object, ProductDTO.class));
+                    productService.updateProductInCategory(objectMapping(object, ProductDTO.class), restaurantId);
                     break;
                 }
                 case "DELETE":{
                     logger.info("product being deleted to the category");
 
-                    productService.deleteProductInCategory(mappingObject(object, ProductDTO.class));
+                    productService.deleteProductInCategory(objectMapping(object, ProductDTO.class), restaurantId);
                     break;
                 }
                 case "UPDATE_SOLD_OUT_STATUS":{
                     logger.info("sold out status being updated to the category");
 
-                    productService.updateSoldOutStatusInCategory(id, mappingObject(object, Boolean.class));
+                    productService.updateSoldOutStatusInCategory(id, objectMapping(object, Boolean.class), restaurantId);
                     break;
                 }
                 case "UPDATE_URL_IMAGE":{
                     logger.info("url image being updated to the category");
 
-                    productService.updateUrlImageInCategory(id, mappingObject(object, String.class));
+                    productService.updateUrlImageInCategory(id, objectMapping(object, String.class), restaurantId);
                     break;
                 }
                 case "UPDATE_CATEGORY_ID":{
                     logger.info("product category being updated");
 
-                    productService.updateProductCategory(id, mappingObject(object, ProductDTO.class));
+                    productService.updateProductCategory(id, objectMapping(object, ProductDTO.class), restaurantId);
                     break;
                 }
                 default:{
@@ -80,7 +82,7 @@ public class CategoryConsumer {
         }
     }
 
-    private <T> T mappingObject(Object object, Class<T> classType){
+    private <T> T objectMapping(Object object, Class<T> classType){
         return Mapper.parseObject(object, classType);
     }
 
