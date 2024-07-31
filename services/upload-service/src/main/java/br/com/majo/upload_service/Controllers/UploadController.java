@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/upload")
 public class UploadController {
@@ -13,9 +15,10 @@ public class UploadController {
     @Autowired
     private UploadService uploadService;
 
-    @PostMapping("/product/{productId}")
+    @PostMapping("/product/{productId}/restaurant/{restaurantId}")
     public ResponseEntity<?> uploadProductImage(@PathVariable(value = "productId") String productId,
+                                                @PathVariable(value = "restaurantId") UUID restaurantId,
                                                 @RequestParam(value = "image") MultipartFile image){
-        return uploadService.uploadProductImage(productId, image);
+        return uploadService.uploadProductImage(productId, restaurantId, image);
     }
 }

@@ -11,13 +11,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @Component
 public class UploadProducer {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
-    private final Map<String, String> data = new HashMap<>();
+    private final Map<String, Object> data = new HashMap<>();
 
     @Autowired
     private NewTopic newTopic;
@@ -28,9 +29,10 @@ public class UploadProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendMessageToProduct(String productId, String urlImage){
+    public void sendMessageToProduct(String productId, UUID restaurantId, String urlImage){
         try{
             data.put("productId", productId);
+            data.put("restaurantId", restaurantId);
             data.put("urlImage", urlImage);
 
             kafkaTemplate.send(newTopic.name(), objectMapper.writeValueAsString(data));

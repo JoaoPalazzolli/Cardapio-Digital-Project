@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @Service
 public class UploadService {
 
@@ -19,10 +21,10 @@ public class UploadService {
     @Autowired
     private UploadProducer producer;
 
-    public ResponseEntity<?> uploadProductImage(String productId, MultipartFile image) {
+    public ResponseEntity<?> uploadProductImage(String productId, UUID restaurantId, MultipartFile image) {
         String urlImage = abstractLocalUploadImageService.upload(image);
 
-        producer.sendMessageToProduct(productId, urlImage);
+        producer.sendMessageToProduct(productId, restaurantId, urlImage);
         logger.info("Image upload successful -> {}", urlImage);
 
         return ResponseEntity.noContent().build();
