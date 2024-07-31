@@ -1,5 +1,6 @@
 package br.com.majo.category_microservice.infra.message.producer;
 
+import br.com.majo.category_microservice.infra.utils.StatusMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -28,14 +29,11 @@ public class CategoryProducer {
     @Value("${spring.application.name}")
     private String fromMessage;
 
-    public void sendMessageToProduct(String message){
-
+    public void sendMessageToProduct(StatusMessage status, String message){
         try{
-            kafkaTemplate.send(newTopic.name(), objectMapper.writeValueAsString(fromMessage + " message: " + message));
-        } catch (KafkaException e){
-            logger.info("Kafka produce error: " + e.getMessage());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            kafkaTemplate.send(newTopic.name(), status.toString(), objectMapper.writeValueAsString(fromMessage + " message: " + message));
+        } catch (KafkaException | JsonProcessingException e){
+            logger.info("error category producer: " + e.getMessage());
         }
     }
 }
