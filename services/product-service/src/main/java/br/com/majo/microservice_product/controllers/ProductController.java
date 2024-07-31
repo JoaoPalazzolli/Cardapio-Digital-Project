@@ -26,9 +26,10 @@ public class ProductController {
         return productService.findAllByRestaurant(restaurantId);
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> findById(@PathVariable(value = "id") String id){
-        return productService.findById(id);
+    @GetMapping(value = "/{id}/restaurant/{restaurantId}")
+    public ResponseEntity<ProductDTO> findByIdAndRestaurantId(@PathVariable(value = "id") String id,
+                                                              @PathVariable(value = "restaurantId") UUID restaurantId){
+        return productService.findByIdAndRestaurantId(id, restaurantId);
     }
 
     @PostMapping
@@ -42,21 +43,24 @@ public class ProductController {
         return productService.updateProduct(id, productDTO);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable(value = "id") String id){
-        return productService.deleteProduct(id);
+    @DeleteMapping(value = "/{id}/restaurant/{restaurantId}")
+    public ResponseEntity<?> deleteProduct(@PathVariable(value = "id") String id,
+                                           @PathVariable(value = "restaurantId") UUID restaurantId){
+        return productService.deleteProduct(id, restaurantId);
     }
 
-    @PatchMapping(value = "/{id}")
+    @PatchMapping(value = "/{id}/restaurant/{restaurantId}")
     public ResponseEntity<?> updateSoldOut(@PathVariable(value = "id") String id,
+            @PathVariable(value = "restaurantId") UUID restaurantId,
             @RequestParam(value = "soldOut", defaultValue = "false") Boolean soldOut){
-        return productService.updateSoldOut(id, soldOut);
+        return productService.updateSoldOut(id, restaurantId, soldOut);
     }
 
-    @PatchMapping(value = "/{productId}/{categoryId}")
+    @PatchMapping(value = "/{productId}/category/{categoryId}/restaurant/{restaurantId}")
     public ResponseEntity<?> updateProductCategory(@PathVariable(value = "productId") String productId,
-                                           @PathVariable(value = "categoryId") String categoryId){
-        return productService.updateProductCategory(productId, categoryId);
+                                           @PathVariable(value = "categoryId") String categoryId,
+                                                   @PathVariable(value = "restaurantId") UUID restaurantId){
+        return productService.updateProductCategory(productId, categoryId, restaurantId);
     }
 
 }

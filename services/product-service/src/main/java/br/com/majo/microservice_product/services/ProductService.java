@@ -34,24 +34,23 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-
     public ResponseEntity<List<ProductDTO>> findAll(){
         logger.info("Finding all products");
 
         var productsDTO = Mapper.parseListObject(productRepository.findAll(), ProductDTO.class);
 
-        productsDTO.forEach(x -> x.add(linkTo(methodOn(ProductController.class).findById(x.getId())).withSelfRel()));
+        productsDTO.forEach(x -> x.add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(x.getId(), x.getRestaurantId())).withSelfRel()));
 
         return ResponseEntity.ok(productsDTO);
     }
 
-    public ResponseEntity<ProductDTO> findById(String id){
+    public ResponseEntity<ProductDTO> findByIdAndRestaurantId(String id, UUID restaurantId){
         logger.info("Finding product by id. (product id: ({}))", id);
 
-        var productDTO = Mapper.parseObject(productRepository.findById(id)
+        var productDTO = Mapper.parseObject(productRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found")), ProductDTO.class);
 
-        productDTO.add(linkTo(methodOn(ProductController.class).findById(id)).withSelfRel());
+        productDTO.add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(id, restaurantId)).withSelfRel());
 
         return ResponseEntity.ok(productDTO);
     }
@@ -67,9 +66,9 @@ public class ProductService {
         product.setCreateAt(new Date());
 
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
-                .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
+                .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
-        producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto);
+        producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId());
         logger.info("Success created product. (product id: ({}))", dto.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -78,73 +77,74 @@ public class ProductService {
     @Transactional
     public ResponseEntity<ProductDTO> updateProduct(String id, ProductDTO productDTO){
 
-        var product = productRepository.findById(id)
+        var product = productRepository.findByIdAndRestaurantId(id, productDTO.getRestaurantId())
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        if(productAlreadyExist(productDTO.getName(), product.getCategoryId()) && !product.getName().equalsIgnoreCase(productDTO.getName())){
+        if(productAlreadyExist(productDTO.getName(), product.getCategoryId()) &&
+                !product.getName().equalsIgnoreCase(productDTO.getName())){
             throw new ProductAlreadyExistException("This product already exist");
         }
 
         productDTO.setCreateAt(product.getCreateAt());
-        productDTO.setRestaurantId(product.getRestaurantId());
         productDTO.setCategoryId(product.getCategoryId());
         productDTO.setUrlImage(product.getUrlImage());
+        productDTO.setSoldOut(product.getSoldOut());
         productDTO.setId(id);
         product = Mapper.parseObject(productDTO, ProductDomain.class);
 
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
-                .add(linkTo(methodOn(ProductController.class).findById(product.getId())).withSelfRel());
+                .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
-        producer.sendMessageToCategory(MethodType.UPDATE, dto);
+        producer.sendMessageToCategory(MethodType.UPDATE, dto, dto.getRestaurantId());
         logger.info("Success updated product. (product id: ({}))", id);
 
         return ResponseEntity.ok(dto);
     }
 
     @Transactional
-    public ResponseEntity<?> deleteProduct(String id){
+    public ResponseEntity<?> deleteProduct(String id, UUID restaurantId){
 
-        var product = productRepository.findById(id)
+        var product = productRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
         productRepository.delete(product);
 
-        producer.sendMessageToCategory(MethodType.DELETE, product);
+        producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId);
         logger.info("Success deleted product. (product id: ({}))", id);
 
         return ResponseEntity.noContent().build();
     }
 
     @Transactional
-    public ResponseEntity<?> updateSoldOut(String id, Boolean soldOut){
+    public ResponseEntity<?> updateSoldOut(String id, UUID restaurantId, Boolean soldOut){
 
-        productRepository.updateSoldOut(id, soldOut);
+        productRepository.updateSoldOut(id, restaurantId, soldOut);
 
-        producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut);
+        producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId);
         logger.info("sold out status has been updated success. (product id: ({}))", id);
 
         return ResponseEntity.noContent().build();
     }
 
     @Transactional
-    public void updateUrlImage(String id, String urlImage){
+    public void updateUrlImage(String id, UUID restaurantId, String urlImage){
 
-        productRepository.updateUrlImage(id, urlImage);
+        productRepository.updateUrlImage(id, restaurantId, urlImage);
 
-        producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage);
+        producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage, restaurantId);
         logger.info("url image has been updated success. (product id: ({}))", id);
     }
 
     @Transactional
-    public ResponseEntity<?> updateProductCategory(String productId, String categoryId){
+    public ResponseEntity<?> updateProductCategory(String productId, String categoryId, UUID restaurantId){
 
-        var product = productRepository.findById(productId)
+        var product = productRepository.findByIdAndRestaurantId(productId, restaurantId)
                         .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        productRepository.updateCategoryId(productId, categoryId);
+        productRepository.updateCategoryId(productId, restaurantId, categoryId);
 
         producer.sendMessageToCategory(MethodType.UPDATE_CATEGORY_ID, categoryId,
-                Mapper.parseObject(product, ProductDTO.class));
+                Mapper.parseObject(product, ProductDTO.class), restaurantId);
         logger.info("category has been updated success. (product id: ({}))", productId);
 
         return ResponseEntity.noContent().build();
@@ -154,7 +154,7 @@ public class ProductService {
         var dtos = Mapper.parseListObject(productRepository.findAllByRestaurantId(restaurantId), ProductDTO.class);
 
         dtos.forEach((x -> x.add(linkTo(methodOn(ProductController.class)
-                .findById(x.getId())).withSelfRel())));
+                .findByIdAndRestaurantId(x.getId(), x.getRestaurantId())).withSelfRel())));
 
         return ResponseEntity.ok(dtos);
     }
