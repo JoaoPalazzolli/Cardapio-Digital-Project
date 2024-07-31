@@ -26,9 +26,11 @@ public class CategoryController {
         return categoryService.findAllByRestaurant(restaurantId);
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<CategoryDTO> findById(@PathVariable(value = "id") String id){
-        return categoryService.findById(id);
+    @GetMapping(value = "/{id}/restaurant/{restaurantId}")
+    public ResponseEntity<CategoryDTO> findByIdAndRestaurantId(
+            @PathVariable(value = "id") String id,
+            @PathVariable(value = "restaurantId") UUID restaurantId){
+        return categoryService.findByIdAndRestaurantId(id, restaurantId);
     }
 
     @PostMapping
@@ -42,8 +44,9 @@ public class CategoryController {
         return categoryService.updateCategory(id, categoryDTO);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteCategory(@PathVariable(value = "id") String id){
-        return categoryService.deteleCategory(id);
+    @DeleteMapping(value = "/{id}/restaurant/{restaurantId}")
+    public ResponseEntity<?> deleteCategory(@PathVariable(value = "id") String id,
+                                            @PathVariable(value = "restaurantId") UUID restaurantId){
+        return categoryService.deteleCategory(id, restaurantId);
     }
 }

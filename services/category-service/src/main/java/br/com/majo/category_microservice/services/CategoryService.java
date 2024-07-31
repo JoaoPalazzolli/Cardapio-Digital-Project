@@ -35,17 +35,17 @@ public class CategoryService {
 
         var dtos = Mapper.parseListObject(categoryRepository.findAll(), CategoryDTO.class);
 
-        dtos.forEach(x -> x.add(linkTo(methodOn(CategoryController.class).findById(x.getId())).withSelfRel()));
+        dtos.forEach(x -> x.add(linkTo(methodOn(CategoryController.class).findByIdAndRestaurantId(x.getId(), x.getRestaurantId())).withSelfRel()));
 
         return ResponseEntity.ok(dtos);
     }
 
-    public ResponseEntity<CategoryDTO> findById(String id) {
+    public ResponseEntity<CategoryDTO> findByIdAndRestaurantId(String id, UUID restaurantId) {
         logger.info("Finding category by id. (category id: ({}))", id);
 
-        var dto = Mapper.parseObject(categoryRepository.findById(id)
+        var dto = Mapper.parseObject(categoryRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found")), CategoryDTO.class)
-                .add(linkTo(methodOn(CategoryController.class).findById(id)).withSelfRel());
+                .add(linkTo(methodOn(CategoryController.class).findByIdAndRestaurantId(id, restaurantId)).withSelfRel());
 
         return ResponseEntity.ok(dto);
     }
@@ -61,7 +61,7 @@ public class CategoryService {
         category.setCreateAt(new Date());
 
         var dto = Mapper.parseObject(categoryRepository.save(category), CategoryDTO.class)
-                .add(linkTo(methodOn(CategoryController.class).findById(category.getId())).withSelfRel());
+                .add(linkTo(methodOn(CategoryController.class).findByIdAndRestaurantId(category.getId(), category.getRestaurantId())).withSelfRel());
 
         logger.info("Success created category, (category id: ({}))", dto.getId());
 
@@ -70,7 +70,7 @@ public class CategoryService {
 
     @Transactional
     public ResponseEntity<CategoryDTO> updateCategory(String id, CategoryDTO categoryDTO) {
-        var category = categoryRepository.findById(id)
+        var category = categoryRepository.findByIdAndRestaurantId(id, categoryDTO.getRestaurantId())
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
 
         if(categoryAlreadyExist(categoryDTO.getName(), category.getRestaurantId()) &&
@@ -85,7 +85,7 @@ public class CategoryService {
         category = Mapper.parseObject(categoryDTO, CategoryDomain.class);
 
         var dto = Mapper.parseObject(categoryRepository.save(category), CategoryDTO.class)
-                .add(linkTo(methodOn(CategoryController.class).findById(id)).withSelfRel());
+                .add(linkTo(methodOn(CategoryController.class).findByIdAndRestaurantId(id, category.getRestaurantId())).withSelfRel());
 
         logger.info("Success updated category. (category id: ({}))", id);
 
@@ -93,8 +93,8 @@ public class CategoryService {
     }
 
     @Transactional
-    public ResponseEntity<?> deteleCategory(String id) {
-        var category = categoryRepository.findById(id)
+    public ResponseEntity<?> deteleCategory(String id, UUID restaurantId) {
+        var category = categoryRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
 
         categoryRepository.delete(category);
@@ -107,7 +107,7 @@ public class CategoryService {
     public ResponseEntity<List<CategoryDTO>> findAllByRestaurant(UUID restaurantId) {
         var dtos = Mapper.parseListObject(categoryRepository.findAllByRestaurantId(restaurantId), CategoryDTO.class);
 
-        dtos.forEach(x -> x.add(linkTo(methodOn(CategoryController.class).findById(x.getId())).withSelfRel()));
+        dtos.forEach(x -> x.add(linkTo(methodOn(CategoryController.class).findByIdAndRestaurantId(x.getId(), x.getRestaurantId())).withSelfRel()));
 
         return ResponseEntity.ok(dtos);
     }
