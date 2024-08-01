@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -25,7 +24,6 @@ public class ProductService {
     @Autowired
     private CategoryProducer producer;
 
-    @Transactional
     public void addProductInCategory(String categoryId, ProductDTO productDTO, UUID restaurantId){
         var category = categoryRepository.findByIdAndRestaurantId(categoryId, restaurantId)
                 .orElseThrow(() -> {
@@ -46,7 +44,6 @@ public class ProductService {
         logger.info("product success added to category. (product id: ({}))", productDTO.getId());
     }
 
-    @Transactional
     public void updateProductInCategory(ProductDTO productDTO, UUID restaurantId){
         var category = categoryRepository.findByProductIdAndRestaurantId(productDTO.getId(), restaurantId)
                 .orElseThrow(() -> {
@@ -68,7 +65,6 @@ public class ProductService {
 
     }
 
-    @Transactional
     public void deleteProductInCategory(ProductDTO productDTO, UUID restaurantId){
         var category = categoryRepository.findByProductIdAndRestaurantId(productDTO.getId(), restaurantId)
                 .orElseThrow(() -> {
@@ -86,7 +82,6 @@ public class ProductService {
 
     }
 
-    @Transactional
     public void updateSoldOutStatusInCategory(String productId, boolean soldOut, UUID restaurantId){
         var category = categoryRepository.findByProductIdAndRestaurantId(productId, restaurantId)
                 .orElseThrow(() -> {
@@ -106,7 +101,6 @@ public class ProductService {
 
     }
 
-    @Transactional
     public void updateUrlImageInCategory(String productId, String urlImage, UUID restaurantId) {
         var category = categoryRepository.findByProductIdAndRestaurantId(productId, restaurantId)
                 .orElseThrow(() -> {
@@ -125,7 +119,6 @@ public class ProductService {
         logger.info("url image has been updated successfully. (product id: ({}))", productId);
     }
 
-    @Transactional
     public void updateProductCategory(String categoryId, ProductDTO productDTO, UUID restaurantId){
 
         var sourceCategory = categoryRepository.findByProductIdAndRestaurantId(productDTO.getId(), restaurantId)

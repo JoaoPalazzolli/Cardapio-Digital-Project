@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -50,9 +49,7 @@ public class CategoryService {
         return ResponseEntity.ok(dto);
     }
 
-    @Transactional
     public ResponseEntity<CategoryDTO> createCategory(CategoryDTO categoryDTO) {
-
         if(categoryAlreadyExist(categoryDTO.getName(), categoryDTO.getRestaurantId())){
             throw new CategoryAlreadyExistException("This category already exist");
         }
@@ -68,7 +65,6 @@ public class CategoryService {
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    @Transactional
     public ResponseEntity<CategoryDTO> updateCategory(String id, CategoryDTO categoryDTO) {
         var category = categoryRepository.findByIdAndRestaurantId(id, categoryDTO.getRestaurantId())
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
@@ -92,7 +88,6 @@ public class CategoryService {
         return ResponseEntity.ok(dto);
     }
 
-    @Transactional
     public ResponseEntity<?> deteleCategory(String id, UUID restaurantId) {
         var category = categoryRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new CategoryNotFoundException("Category not found"));
