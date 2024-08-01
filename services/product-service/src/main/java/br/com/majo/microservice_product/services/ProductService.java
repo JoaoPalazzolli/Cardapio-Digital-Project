@@ -3,18 +3,20 @@ package br.com.majo.microservice_product.services;
 import br.com.majo.microservice_product.controllers.ProductController;
 import br.com.majo.microservice_product.domains.ProductDomain;
 import br.com.majo.microservice_product.dtos.ProductDTO;
+import br.com.majo.microservice_product.infra.cache.ProductCache;
 import br.com.majo.microservice_product.infra.exceptions.ProductAlreadyExistException;
 import br.com.majo.microservice_product.infra.exceptions.ProductNotFoundException;
 import br.com.majo.microservice_product.infra.message.producer.ProductProducer;
 import br.com.majo.microservice_product.infra.util.Mapper;
 import br.com.majo.microservice_product.infra.util.MethodType;
+import br.com.majo.microservice_product.repositories.ProductCacheRepository;
 import br.com.majo.microservice_product.repositories.ProductRepository;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -33,6 +35,9 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ProductCacheRepository productCacheRepository;
 
     public ResponseEntity<List<ProductDTO>> findAll(){
         logger.info("Finding all products");
@@ -55,7 +60,6 @@ public class ProductService {
         return ResponseEntity.ok(productDTO);
     }
 
-    @Transactional
     public ResponseEntity<ProductDTO> createProduct(ProductDTO productDTO){
 
         if(productAlreadyExist(productDTO.getName(), productDTO.getCategoryId())){
@@ -74,11 +78,12 @@ public class ProductService {
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    @Transactional
     public ResponseEntity<ProductDTO> updateProduct(String id, ProductDTO productDTO){
 
         var product = productRepository.findByIdAndRestaurantId(id, productDTO.getRestaurantId())
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        productCacheRepository.save(Mapper.parseObject(product, ProductCache.class)); // armazenando antigo produto no cache
 
         if(productAlreadyExist(productDTO.getName(), product.getCategoryId()) &&
                 !product.getName().equalsIgnoreCase(productDTO.getName())){
@@ -101,7 +106,6 @@ public class ProductService {
         return ResponseEntity.ok(dto);
     }
 
-    @Transactional
     public ResponseEntity<?> deleteProduct(String id, UUID restaurantId){
 
         var product = productRepository.findByIdAndRestaurantId(id, restaurantId)
@@ -115,7 +119,6 @@ public class ProductService {
         return ResponseEntity.noContent().build();
     }
 
-    @Transactional
     public ResponseEntity<?> updateSoldOut(String id, UUID restaurantId, Boolean soldOut){
 
         productRepository.updateSoldOut(id, restaurantId, soldOut);
@@ -126,7 +129,6 @@ public class ProductService {
         return ResponseEntity.noContent().build();
     }
 
-    @Transactional
     public void updateUrlImage(String id, UUID restaurantId, String urlImage){
 
         productRepository.updateUrlImage(id, restaurantId, urlImage);
@@ -135,7 +137,6 @@ public class ProductService {
         logger.info("url image has been updated success. (product id: ({}))", id);
     }
 
-    @Transactional
     public ResponseEntity<?> updateProductCategory(String productId, String categoryId, UUID restaurantId){
 
         var product = productRepository.findByIdAndRestaurantId(productId, restaurantId)

@@ -31,6 +31,7 @@ public class ProductConsumer {
                 }
                 case "FAILED":{
                     logger.info("ERROR - " + message);
+                    break;
                 }
             }
 
