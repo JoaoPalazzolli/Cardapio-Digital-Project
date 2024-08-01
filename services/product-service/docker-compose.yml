@@ -101,10 +101,20 @@ services:
     networks:
       - postgres-net
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+
 volumes:
   mongo-data:
   postgres-data:
   pgadmin-data:
+  redis-data:
 
 networks:
   mongo-net:
