@@ -1,4 +1,4 @@
-package br.com.majo.restaurant_service.infra.utils;
+package br.com.majo.restaurantservice.infra.utils;
 
 import org.modelmapper.ModelMapper;
 
