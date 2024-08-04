@@ -5,18 +5,16 @@ import br.com.majo.categoryservice.infra.external.dtos.ProductDTO;
 import br.com.majo.categoryservice.infra.message.producer.CategoryProducer;
 import br.com.majo.categoryservice.infra.utils.StatusMessage;
 import br.com.majo.categoryservice.repositories.CategoryRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ProductService {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -41,7 +39,7 @@ public class ProductService {
 
         producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                 .format("product success added to category. (product id: (%s))", productDTO.getId()));
-        logger.info("product success added to category. (product id: ({}))", productDTO.getId());
+        log.info("product success added to category. (product id: ({}))", productDTO.getId());
     }
 
     public void updateProductInCategory(ProductDTO productDTO, UUID restaurantId){
@@ -61,7 +59,7 @@ public class ProductService {
 
         producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                 .format("success updated product in category. (product id: (%s))", productDTO.getId()));
-        logger.info("success updated product in category. (product id: ({}))", productDTO.getId());
+        log.info("success updated product in category. (product id: ({}))", productDTO.getId());
 
     }
 
@@ -78,7 +76,7 @@ public class ProductService {
 
         producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                 .format("success deleted product in category. (product id: (%s))", productDTO.getId()));
-        logger.info("success deleted product in category. (product id: ({}))", productDTO.getId());
+        log.info("success deleted product in category. (product id: ({}))", productDTO.getId());
 
     }
 
@@ -97,7 +95,7 @@ public class ProductService {
 
         producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                 .format("sold out status has been updated successfully. (product id: (%s))", productId));
-        logger.info("sold out status has been updated successfully. (product id: ({}))", productId);
+        log.info("sold out status has been updated successfully. (product id: ({}))", productId);
 
     }
 
@@ -116,7 +114,7 @@ public class ProductService {
 
         producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                 .format("url image has been updated successfully. (product id: (%s))", productId));
-        logger.info("url image has been updated successfully. (product id: ({}))", productId);
+        log.info("url image has been updated successfully. (product id: ({}))", productId);
     }
 
     public void updateProductCategory(String categoryId, ProductDTO productDTO, UUID restaurantId){
@@ -146,6 +144,6 @@ public class ProductService {
 
         producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                 .format("product category has been updated successfully. (product id: (%s))", productDTO.getId()));
-        logger.info("product category has been updated successfully. (product id: ({}))", productDTO.getId());
+        log.info("product category has been updated successfully. (product id: ({}))", productDTO.getId());
     }
 }

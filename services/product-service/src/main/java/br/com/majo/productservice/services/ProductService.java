@@ -11,7 +11,7 @@ import br.com.majo.productservice.infra.util.Mapper;
 import br.com.majo.productservice.infra.util.MethodType;
 import br.com.majo.productservice.repositories.ProductCacheRepository;
 import br.com.majo.productservice.repositories.ProductRepository;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -25,10 +25,10 @@ import java.util.UUID;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+@Slf4j
 @Service
 public class ProductService {
 
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private ProductProducer producer;
@@ -40,7 +40,7 @@ public class ProductService {
     private ProductCacheRepository productCacheRepository;
 
     public ResponseEntity<List<ProductDTO>> findAll(){
-        logger.info("Finding all products");
+        log.info("Finding all products");
 
         var productsDTO = Mapper.parseListObject(productRepository.findAll(), ProductDTO.class);
 
@@ -50,7 +50,7 @@ public class ProductService {
     }
 
     public ResponseEntity<ProductDTO> findByIdAndRestaurantId(String id, UUID restaurantId){
-        logger.info("Finding product by id. (product id: ({}))", id);
+        log.info("Finding product by id. (product id: ({}))", id);
 
         var productDTO = Mapper.parseObject(productRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found")), ProductDTO.class);
@@ -73,7 +73,7 @@ public class ProductService {
                 .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
         producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId());
-        logger.info("Success created product. (product id: ({}))", dto.getId());
+        log.info("Success created product. (product id: ({}))", dto.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
@@ -101,7 +101,7 @@ public class ProductService {
                 .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
         producer.sendMessageToCategory(MethodType.UPDATE, dto, dto.getRestaurantId());
-        logger.info("Success updated product. (product id: ({}))", id);
+        log.info("Success updated product. (product id: ({}))", id);
 
         return ResponseEntity.ok(dto);
     }
@@ -114,7 +114,7 @@ public class ProductService {
         productRepository.delete(product);
 
         producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId);
-        logger.info("Success deleted product. (product id: ({}))", id);
+        log.info("Success deleted product. (product id: ({}))", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -124,7 +124,7 @@ public class ProductService {
         productRepository.updateSoldOut(id, restaurantId, soldOut);
 
         producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId);
-        logger.info("sold out status has been updated success. (product id: ({}))", id);
+        log.info("sold out status has been updated success. (product id: ({}))", id);
 
         return ResponseEntity.noContent().build();
     }
@@ -134,7 +134,7 @@ public class ProductService {
         productRepository.updateUrlImage(id, restaurantId, urlImage);
 
         producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage, restaurantId);
-        logger.info("url image has been updated success. (product id: ({}))", id);
+        log.info("url image has been updated success. (product id: ({}))", id);
     }
 
     public ResponseEntity<?> updateProductCategory(String productId, String categoryId, UUID restaurantId){
@@ -146,12 +146,14 @@ public class ProductService {
 
         producer.sendMessageToCategory(MethodType.UPDATE_CATEGORY_ID, categoryId,
                 Mapper.parseObject(product, ProductDTO.class), restaurantId);
-        logger.info("category has been updated success. (product id: ({}))", productId);
+        log.info("category has been updated success. (product id: ({}))", productId);
 
         return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<List<ProductDTO>> findAllByRestaurant(UUID restaurantId) {
+        log.info("Finding all products by restaurant");
+
         var dtos = Mapper.parseListObject(productRepository.findAllByRestaurantId(restaurantId), ProductDTO.class);
 
         dtos.forEach((x -> x.add(linkTo(methodOn(ProductController.class)

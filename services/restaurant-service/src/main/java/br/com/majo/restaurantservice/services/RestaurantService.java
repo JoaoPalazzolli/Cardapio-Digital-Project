@@ -7,6 +7,7 @@ import br.com.majo.restaurantservice.infra.exceptions.RestaurantNotFoundExceptio
 import br.com.majo.restaurantservice.infra.utils.Mapper;
 import br.com.majo.restaurantservice.repositories.RestaurantRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+@Slf4j
 @Service
 public class RestaurantService {
 
@@ -26,6 +28,8 @@ public class RestaurantService {
     private RestaurantRepository restaurantRepository;
 
     public ResponseEntity<List<RestaurantDTO>> findAll() {
+        log.info("Finding all restaurants");
+
         var dtos = Mapper.parseListObject(restaurantRepository.findAll(), RestaurantDTO.class);
 
         dtos.forEach(x -> x.add(linkTo(methodOn(RestaurantController.class).findById(x.getId())).withSelfRel()));
@@ -34,6 +38,8 @@ public class RestaurantService {
     }
 
     public ResponseEntity<RestaurantDTO> findById(UUID id){
+        log.info("Finding restaurant by id");
+
         var restaurantDTO = Mapper.parseObject(restaurantRepository.findById(id)
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found")), RestaurantDTO.class);
 
@@ -51,6 +57,8 @@ public class RestaurantService {
         var dto = Mapper.parseObject(restaurantRepository.save(restaurant), RestaurantDTO.class)
                 .add(linkTo(methodOn(RestaurantController.class).findById(restaurant.getId())).withSelfRel());
 
+        log.info("restaurant created success");
+
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
@@ -60,6 +68,8 @@ public class RestaurantService {
                 .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found"));
 
         restaurantRepository.delete(restaurant);
+
+        log.info("restaurant deleted success");
 
         return ResponseEntity.noContent().build();
     }

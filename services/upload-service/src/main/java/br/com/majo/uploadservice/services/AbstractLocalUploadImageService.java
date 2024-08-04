@@ -3,8 +3,7 @@ package br.com.majo.uploadservice.services;
 import br.com.majo.uploadservice.infra.exceptions.UploadException;
 import br.com.majo.uploadservice.infra.util.ImageTypes;
 import br.com.majo.uploadservice.infra.util.UploadImage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -18,17 +17,16 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class AbstractLocalUploadImageService implements UploadImage {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${upload.images.path}")
     private String directory;
 
     @Override
     public String upload(MultipartFile image) {
-        logger.info("Uploading image");
+        log.info("Uploading image");
 
         var storageLocation = createDirectory();
 

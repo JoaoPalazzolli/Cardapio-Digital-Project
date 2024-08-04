@@ -3,6 +3,7 @@ package br.com.majo.productservice.infra.message.producer;
 import br.com.majo.productservice.infra.util.MethodType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.KafkaException;
@@ -12,12 +13,11 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
+@Slf4j
 @Component
 public class ProductProducer {
-
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    
     private final Map<String, Object> data = new HashMap<>();
 
     @Autowired
@@ -37,9 +37,9 @@ public class ProductProducer {
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException e){
-            logger.info("Kafka produce error: " + e.getMessage());
+            log.info("Kafka produce error: {}", e.getMessage());
         } catch (JsonProcessingException e) {
-            logger.info("Json error: " + e.getMessage());
+            log.info("Json error: {}", e.getMessage());
         }
     }
 
@@ -50,9 +50,9 @@ public class ProductProducer {
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException e){
-            logger.info("Kafka produce error: " + e.getMessage());
+            log.info("Kafka produce error: {}", e.getMessage());
         } catch (JsonProcessingException e) {
-            logger.info("Json error: " + e.getMessage());
+            log.info("Json error: {}", e.getMessage());
         }
     }
 }

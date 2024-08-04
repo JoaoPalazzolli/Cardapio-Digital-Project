@@ -3,6 +3,7 @@ package br.com.majo.productservice.infra.message.consumer;
 import br.com.majo.productservice.infra.util.Mapper;
 import br.com.majo.productservice.infra.util.ProductListener;
 import br.com.majo.productservice.services.ProductService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -11,12 +12,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @Component
+@Slf4j
 public class ProductConsumer {
-
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     @Autowired
     private ProductService productService;
@@ -26,17 +25,17 @@ public class ProductConsumer {
         try{
             switch (status){
                 case "SUCCESS":{
-                    logger.info("SUCCESS - " + message);
+                    log.info("SUCCESS - {}", message);
                     break;
                 }
                 case "FAILED":{
-                    logger.info("ERROR - " + message);
+                    log.info("ERROR - {}", message);
                     break;
                 }
             }
 
         } catch (KafkaException e){
-            logger.info("Kafka Consumer Error: " + e.getMessage());
+            log.info("Kafka Consumer Error: {}", e.getMessage());
         }
     }
 
@@ -50,7 +49,7 @@ public class ProductConsumer {
             productService.updateUrlImage(productId, restaurantId, urlImage);
 
         } catch (KafkaException e){
-            logger.info("Kafka Consumer Error: " + e.getMessage());
+            log.info("Kafka Consumer Error: {}", e.getMessage());
         }
     }
 
