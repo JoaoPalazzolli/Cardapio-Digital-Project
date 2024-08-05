@@ -9,7 +9,6 @@ import br.com.majo.productservice.infra.exceptions.ProductNotFoundException;
 import br.com.majo.productservice.infra.message.producer.ProductProducer;
 import br.com.majo.productservice.infra.util.Mapper;
 import br.com.majo.productservice.infra.util.MethodType;
-import br.com.majo.productservice.repositories.ProductCacheRepository;
 import br.com.majo.productservice.repositories.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Service
 public class ProductService {
 
-
     @Autowired
     private ProductProducer producer;
 
@@ -37,7 +35,7 @@ public class ProductService {
     private ProductRepository productRepository;
 
     @Autowired
-    private ProductCacheRepository productCacheRepository;
+    private ProductCacheService productCacheService;
 
     public ResponseEntity<List<ProductDTO>> findAll(){
         log.info("Finding all products");
@@ -72,6 +70,7 @@ public class ProductService {
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
                 .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
+        productCacheService.saveLastVersion(Mapper.parseObject(product, ProductCache.class));
         producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId());
         log.info("Success created product. (product id: ({}))", dto.getId());
 
@@ -83,7 +82,7 @@ public class ProductService {
         var product = productRepository.findByIdAndRestaurantId(id, productDTO.getRestaurantId())
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
-        productCacheRepository.save(Mapper.parseObject(product, ProductCache.class)); // armazenando antigo produto no cache
+        productCacheService.saveLastVersion(Mapper.parseObject(product, ProductCache.class));
 
         if(productAlreadyExist(productDTO.getName(), product.getCategoryId()) &&
                 !product.getName().equalsIgnoreCase(productDTO.getName())){
@@ -111,6 +110,8 @@ public class ProductService {
         var product = productRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
 
+        productCacheService.saveLastVersion(Mapper.parseObject(product, ProductCache.class));
+
         productRepository.delete(product);
 
         producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId);
@@ -123,6 +124,7 @@ public class ProductService {
 
         productRepository.updateSoldOut(id, restaurantId, soldOut);
 
+        productCacheService.saveLastVersion(id, soldOut);
         producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId);
         log.info("sold out status has been updated success. (product id: ({}))", id);
 
@@ -133,6 +135,7 @@ public class ProductService {
 
         productRepository.updateUrlImage(id, restaurantId, urlImage);
 
+        productCacheService.saveLastVersion(id, urlImage);
         producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage, restaurantId);
         log.info("url image has been updated success. (product id: ({}))", id);
     }
@@ -141,6 +144,8 @@ public class ProductService {
 
         var product = productRepository.findByIdAndRestaurantId(productId, restaurantId)
                         .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+
+        productCacheService.saveLastVersion(Mapper.parseObject(product, ProductCache.class));
 
         productRepository.updateCategoryId(productId, restaurantId, categoryId);
 
