@@ -23,13 +23,10 @@ public class ProductCacheService {
         // armazenando versão antiga do produto no cache
 
         if (object instanceof Boolean){
-            System.out.println("TESTE");
             productCacheRepository.save(ProductCache.builder()
                     .id(id)
                     .soldOut((Boolean) object)
                     .build());
-
-            System.out.println(productCacheRepository.findAll());
         }
 
         if (object instanceof String){
