@@ -52,7 +52,7 @@ public class KafkaConsumerConfig {
     DefaultErrorHandler errorHandler(){
         return new DefaultErrorHandler(
                 new DeadLetterPublishingRecoverer(kafkaTemplate),
-                new FixedBackOff(1000L, 0L)
+                new FixedBackOff(1000L, 3L)
         );
     }
 
