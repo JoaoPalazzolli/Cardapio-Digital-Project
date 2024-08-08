@@ -44,6 +44,7 @@ public class KafkaConsumerConfig {
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(AUTO_OFFSET_RESET_CONFIG, offset);
+        props.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, 1000);
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new StringDeserializer());
     }
 
@@ -51,7 +52,7 @@ public class KafkaConsumerConfig {
     DefaultErrorHandler errorHandler(){
         return new DefaultErrorHandler(
                 new DeadLetterPublishingRecoverer(kafkaTemplate),
-                new FixedBackOff(1000L, 2L)
+                new FixedBackOff(1000L, 0L)
         );
     }
 
