@@ -34,33 +34,33 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO){
-        return productService.createProduct(productDTO);
+        return productService.createProduct(productDTO, false);
     }
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable(value = "id") String id,
                                                     @RequestBody ProductDTO productDTO){
-        return productService.updateProduct(id, productDTO);
+        return productService.updateProduct(id, productDTO, false);
     }
 
     @DeleteMapping(value = "/{id}/restaurant/{restaurantId}")
     public ResponseEntity<?> deleteProduct(@PathVariable(value = "id") String id,
                                            @PathVariable(value = "restaurantId") UUID restaurantId){
-        return productService.deleteProduct(id, restaurantId);
+        return productService.deleteProduct(id, restaurantId, false);
     }
 
     @PatchMapping(value = "/{id}/restaurant/{restaurantId}")
     public ResponseEntity<?> updateSoldOut(@PathVariable(value = "id") String id,
             @PathVariable(value = "restaurantId") UUID restaurantId,
             @RequestParam(value = "soldOut", defaultValue = "false") Boolean soldOut){
-        return productService.updateSoldOut(id, restaurantId, soldOut);
+        return productService.updateSoldOut(id, restaurantId, soldOut, false);
     }
 
     @PatchMapping(value = "/{productId}/category/{categoryId}/restaurant/{restaurantId}")
     public ResponseEntity<?> updateProductCategory(@PathVariable(value = "productId") String productId,
                                            @PathVariable(value = "categoryId") String categoryId,
                                                    @PathVariable(value = "restaurantId") UUID restaurantId){
-        return productService.updateProductCategory(productId, categoryId, restaurantId);
+        return productService.updateProductCategory(productId, categoryId, restaurantId, false);
     }
 
 }

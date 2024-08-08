@@ -58,7 +58,7 @@ public class ProductService {
         return ResponseEntity.ok(productDTO);
     }
 
-    public ResponseEntity<ProductDTO> createProduct(ProductDTO productDTO){
+    public ResponseEntity<ProductDTO> createProduct(ProductDTO productDTO, Boolean isRollback){
 
         if(productAlreadyExist(productDTO.getName(), productDTO.getCategoryId())){
             throw new ProductAlreadyExistException("This product already exist");
@@ -71,13 +71,16 @@ public class ProductService {
                 .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
         productCacheService.saveLastVersion(Mapper.parseObject(product, ProductCache.class));
-        producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId());
-        log.info("Success created product. (product id: ({}))", dto.getId());
+
+        if(!isRollback){
+            producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId());
+            log.info("Success created product. (product id: ({}))", dto.getId());
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    public ResponseEntity<ProductDTO> updateProduct(String id, ProductDTO productDTO){
+    public ResponseEntity<ProductDTO> updateProduct(String id, ProductDTO productDTO, Boolean isRollback){
 
         var product = productRepository.findByIdAndRestaurantId(id, productDTO.getRestaurantId())
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
@@ -99,13 +102,15 @@ public class ProductService {
         var dto = Mapper.parseObject(productRepository.save(product), ProductDTO.class)
                 .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
-        producer.sendMessageToCategory(MethodType.UPDATE, dto, dto.getRestaurantId());
-        log.info("Success updated product. (product id: ({}))", id);
+        if(!isRollback){
+            producer.sendMessageToCategory(MethodType.UPDATE, dto, dto.getRestaurantId());
+            log.info("Success updated product. (product id: ({}))", id);
+        }
 
         return ResponseEntity.ok(dto);
     }
 
-    public ResponseEntity<?> deleteProduct(String id, UUID restaurantId){
+    public ResponseEntity<?> deleteProduct(String id, UUID restaurantId, Boolean isRollback){
 
         var product = productRepository.findByIdAndRestaurantId(id, restaurantId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
@@ -114,33 +119,41 @@ public class ProductService {
 
         productRepository.delete(product);
 
-        producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId);
-        log.info("Success deleted product. (product id: ({}))", id);
+        if(!isRollback){
+            producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId);
+            log.info("Success deleted product. (product id: ({}))", id);
+        }
 
         return ResponseEntity.noContent().build();
     }
 
-    public ResponseEntity<?> updateSoldOut(String id, UUID restaurantId, Boolean soldOut){
+    public ResponseEntity<?> updateSoldOut(String id, UUID restaurantId, Boolean soldOut, Boolean isRollback){
 
         productRepository.updateSoldOut(id, restaurantId, soldOut);
 
-        productCacheService.saveLastVersion(id, soldOut);
-        producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId);
-        log.info("sold out status has been updated success. (product id: ({}))", id);
+        productCacheService.saveLastVersion(id, soldOut, restaurantId);
+
+        if(!isRollback){
+            producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId);
+            log.info("sold out status has been updated success. (product id: ({}))", id);
+        }
 
         return ResponseEntity.noContent().build();
     }
 
-    public void updateUrlImage(String id, UUID restaurantId, String urlImage){
+    public void updateUrlImage(String id, UUID restaurantId, String urlImage, Boolean isRollback){
 
         productRepository.updateUrlImage(id, restaurantId, urlImage);
 
-        productCacheService.saveLastVersion(id, urlImage);
-        producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage, restaurantId);
-        log.info("url image has been updated success. (product id: ({}))", id);
+        productCacheService.saveLastVersion(id, urlImage, restaurantId);
+
+        if(!isRollback){
+            producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage, restaurantId);
+            log.info("url image has been updated success. (product id: ({}))", id);
+        }
     }
 
-    public ResponseEntity<?> updateProductCategory(String productId, String categoryId, UUID restaurantId){
+    public ResponseEntity<?> updateProductCategory(String productId, String categoryId, UUID restaurantId, Boolean isRollback){
 
         var product = productRepository.findByIdAndRestaurantId(productId, restaurantId)
                         .orElseThrow(() -> new ProductNotFoundException("Product not found"));
@@ -149,9 +162,12 @@ public class ProductService {
 
         productRepository.updateCategoryId(productId, restaurantId, categoryId);
 
-        producer.sendMessageToCategory(MethodType.UPDATE_CATEGORY_ID, categoryId,
-                Mapper.parseObject(product, ProductDTO.class), restaurantId);
-        log.info("category has been updated success. (product id: ({}))", productId);
+
+        if(!isRollback){
+            producer.sendMessageToCategory(MethodType.UPDATE_CATEGORY_ID, categoryId,
+                    Mapper.parseObject(product, ProductDTO.class), restaurantId);
+            log.info("category has been updated success. (product id: ({}))", productId);
+        }
 
         return ResponseEntity.noContent().build();
     }
