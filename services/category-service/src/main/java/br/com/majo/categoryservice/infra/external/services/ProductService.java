@@ -3,6 +3,7 @@ package br.com.majo.categoryservice.infra.external.services;
 import br.com.majo.categoryservice.infra.exceptions.CategoryNotFoundException;
 import br.com.majo.categoryservice.infra.external.dtos.ProductDTO;
 import br.com.majo.categoryservice.infra.message.producer.CategoryProducer;
+import br.com.majo.categoryservice.infra.utils.RollbackMethod;
 import br.com.majo.categoryservice.infra.utils.StatusMessage;
 import br.com.majo.categoryservice.repositories.CategoryRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class ProductService {
     public void addProductInCategory(String categoryId, ProductDTO productDTO, UUID restaurantId){
         var category = categoryRepository.findByIdAndRestaurantId(categoryId, restaurantId)
                 .orElseThrow(() -> {
-                    producer.sendMessageToProduct(StatusMessage.FAILED, "category not found");
+                    producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.CREATE, productDTO.getId());
                     return new CategoryNotFoundException("Category not found");
                 });
 
@@ -45,7 +46,7 @@ public class ProductService {
     public void updateProductInCategory(ProductDTO productDTO, UUID restaurantId){
         var category = categoryRepository.findByProductIdAndRestaurantId(productDTO.getId(), restaurantId)
                 .orElseThrow(() -> {
-                    producer.sendMessageToProduct(StatusMessage.FAILED, "category not found");
+                    producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE, productDTO.getId());
                     return new CategoryNotFoundException("Category not found");
                 });
 
@@ -66,7 +67,7 @@ public class ProductService {
     public void deleteProductInCategory(ProductDTO productDTO, UUID restaurantId){
         var category = categoryRepository.findByProductIdAndRestaurantId(productDTO.getId(), restaurantId)
                 .orElseThrow(() -> {
-                    producer.sendMessageToProduct(StatusMessage.FAILED, "category not found");
+                    producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.DELETE, productDTO.getId());
                     return new CategoryNotFoundException("Category not found");
                 });
 
@@ -83,7 +84,7 @@ public class ProductService {
     public void updateSoldOutStatusInCategory(String productId, boolean soldOut, UUID restaurantId){
         var category = categoryRepository.findByProductIdAndRestaurantId(productId, restaurantId)
                 .orElseThrow(() -> {
-                    producer.sendMessageToProduct(StatusMessage.FAILED, "category not found");
+                    producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE_SOLD_OUT_STATUS, productId);
                     return new CategoryNotFoundException("Category not found");
                 });
 
@@ -102,7 +103,7 @@ public class ProductService {
     public void updateUrlImageInCategory(String productId, String urlImage, UUID restaurantId) {
         var category = categoryRepository.findByProductIdAndRestaurantId(productId, restaurantId)
                 .orElseThrow(() -> {
-                    producer.sendMessageToProduct(StatusMessage.FAILED, "category not found");
+                    producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE_URL_IMAGE, productId);
                     return new CategoryNotFoundException("Category not found");
                 });
 
@@ -121,7 +122,7 @@ public class ProductService {
 
         var sourceCategory = categoryRepository.findByProductIdAndRestaurantId(productDTO.getId(), restaurantId)
                 .orElseThrow(() -> {
-                    producer.sendMessageToProduct(StatusMessage.FAILED, "category not found");
+                    producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE_CATEGORY_ID, productDTO.getId());
                     return new CategoryNotFoundException("Category not found");
                 });
 
