@@ -39,7 +39,7 @@ public class CategoryProducer {
 
             kafkaTemplate.send(newTopic.name(), status.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException | JsonProcessingException e){
-            log.info("error category producer: {}", e.getMessage());
+            log.info("category producer error: {}", e.getMessage());
         }
     }
 
@@ -50,7 +50,7 @@ public class CategoryProducer {
 
             kafkaTemplate.send(newTopic.name(), status.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException | JsonProcessingException e){
-            log.info("error category producer: {}", e.getMessage());
+            log.info("category producer error: {}", e.getMessage());
         }
     }
 }
