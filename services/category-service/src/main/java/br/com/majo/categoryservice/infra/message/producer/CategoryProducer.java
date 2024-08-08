@@ -1,5 +1,6 @@
 package br.com.majo.categoryservice.infra.message.producer;
 
+import br.com.majo.categoryservice.infra.utils.RollbackMethod;
 import br.com.majo.categoryservice.infra.utils.StatusMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,9 +12,14 @@ import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Component
 public class CategoryProducer {
+
+    private final Map<String, Object> data = new HashMap<>();
 
     @Autowired
     private NewTopic newTopic;
@@ -29,7 +35,20 @@ public class CategoryProducer {
 
     public void sendMessageToProduct(StatusMessage status, String message){
         try{
-            kafkaTemplate.send(newTopic.name(), status.toString(), objectMapper.writeValueAsString(fromMessage + " message: " + message));
+            data.put("message", fromMessage + " message: " + message);
+
+            kafkaTemplate.send(newTopic.name(), status.toString(), objectMapper.writeValueAsString(data));
+        } catch (KafkaException | JsonProcessingException e){
+            log.info("error category producer: {}", e.getMessage());
+        }
+    }
+
+    public void sendMessageToProduct(StatusMessage status, RollbackMethod rollbackMethod, String productId){
+        try{
+            data.put("rollback", rollbackMethod);
+            data.put("productId", productId);
+
+            kafkaTemplate.send(newTopic.name(), status.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException | JsonProcessingException e){
             log.info("error category producer: {}", e.getMessage());
         }
