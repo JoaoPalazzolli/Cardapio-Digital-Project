@@ -36,10 +36,8 @@ public class ProductProducer {
             data.put("restaurantId", restaurantId);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
-        } catch (KafkaException e){
-            log.info("Kafka produce error: {}", e.getMessage());
-        } catch (JsonProcessingException e) {
-            log.info("Json error: {}", e.getMessage());
+        } catch (KafkaException | JsonProcessingException e){
+            log.info("product producer error: {}", e.getMessage());
         }
     }
 
@@ -49,10 +47,8 @@ public class ProductProducer {
             data.put("restaurantId", restaurantId);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
-        } catch (KafkaException e){
-            log.info("Kafka produce error: {}", e.getMessage());
-        } catch (JsonProcessingException e) {
-            log.info("Json error: {}", e.getMessage());
+        } catch (KafkaException | JsonProcessingException e){
+            log.info("product producer error: {}", e.getMessage());
         }
     }
 }
