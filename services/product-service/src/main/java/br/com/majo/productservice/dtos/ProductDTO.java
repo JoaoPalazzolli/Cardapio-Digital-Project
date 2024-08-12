@@ -29,4 +29,5 @@ public class ProductDTO extends RepresentationModel<ProductDTO> implements Seria
 
     private String categoryId;
     private UUID restaurantId;
+    private String trackingId;
 }
