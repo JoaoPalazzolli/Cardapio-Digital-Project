@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,9 @@ public class ProductProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Value("${spring.application.name}")
+    private String fromService;
+
     public void sendMessageToCategory(MethodType methodType, String id, Object object, UUID restaurantId){
         try{
             data.put("id", id);
@@ -47,6 +51,18 @@ public class ProductProducer {
             data.put("restaurantId", restaurantId);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
+        } catch (KafkaException | JsonProcessingException e){
+            log.info("product producer error: {}", e.getMessage());
+        }
+    }
+
+    public void sendMessageToTracking(String status, String description, String trackingId){
+        try{
+            data.put("trackingId", trackingId);
+            data.put("description", description);
+            data.put("fromService", fromService);
+
+            kafkaTemplate.send("tracking.request.topic.v1", status, objectMapper.writeValueAsString(data));
         } catch (KafkaException | JsonProcessingException e){
             log.info("product producer error: {}", e.getMessage());
         }
