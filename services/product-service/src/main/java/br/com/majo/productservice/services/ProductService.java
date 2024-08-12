@@ -12,7 +12,6 @@ import br.com.majo.productservice.infra.util.MethodType;
 import br.com.majo.productservice.repositories.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -73,11 +72,14 @@ public class ProductService {
         productCacheService.saveLastVersion(Mapper.parseObject(product, ProductCache.class));
 
         if(!isRollback){
+            var trackingId = generateTrackingId();
+            dto.setTrackingId(trackingId);
+            producer.sendMessageToTracking("PENDING", "Publishing a Product", trackingId);
             producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId());
             log.info("Success created product. (product id: ({}))", dto.getId());
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(dto);
     }
 
     public ResponseEntity<ProductDTO> updateProduct(String id, ProductDTO productDTO, Boolean isRollback){
@@ -103,6 +105,9 @@ public class ProductService {
                 .add(linkTo(methodOn(ProductController.class).findByIdAndRestaurantId(product.getId(), product.getRestaurantId())).withSelfRel());
 
         if(!isRollback){
+            var trackingId = generateTrackingId();
+            dto.setTrackingId(trackingId);
+            producer.sendMessageToTracking("PENDING", "Updating a Product", trackingId);
             producer.sendMessageToCategory(MethodType.UPDATE, dto, dto.getRestaurantId());
             log.info("Success updated product. (product id: ({}))", id);
         }
@@ -120,6 +125,8 @@ public class ProductService {
         productRepository.delete(product);
 
         if(!isRollback){
+            var trackingId = generateTrackingId();
+            producer.sendMessageToTracking("PENDING", "Deleting a Product", trackingId);
             producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId);
             log.info("Success deleted product. (product id: ({}))", id);
         }
@@ -134,6 +141,8 @@ public class ProductService {
         productCacheService.saveLastVersion(id, soldOut, restaurantId);
 
         if(!isRollback){
+            var trackingId = generateTrackingId();
+            producer.sendMessageToTracking("PENDING", "Updating the Sold Out Status", trackingId);
             producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId);
             log.info("sold out status has been updated success. (product id: ({}))", id);
         }
@@ -147,7 +156,10 @@ public class ProductService {
 
         productCacheService.saveLastVersion(id, urlImage, restaurantId);
 
+        // inicia em upload e termina em category --- ajustar os producer e consumer
+        // possivel alteração para todos não alterarem mais void e sim pelo menos o ID de monitoramento...
         if(!isRollback){
+            producer.sendMessageToTracking("PENDING", "Updating the Product Image", generateTrackingId());
             producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage, restaurantId);
             log.info("url image has been updated success. (product id: ({}))", id);
         }
@@ -162,8 +174,9 @@ public class ProductService {
 
         productRepository.updateCategoryId(productId, restaurantId, categoryId);
 
-
         if(!isRollback){
+            var trackingId = generateTrackingId();
+            producer.sendMessageToTracking("PENDING", "Updating the Category of Product", trackingId);
             producer.sendMessageToCategory(MethodType.UPDATE_CATEGORY_ID, categoryId,
                     Mapper.parseObject(product, ProductDTO.class), restaurantId);
             log.info("category has been updated success. (product id: ({}))", productId);
@@ -185,5 +198,9 @@ public class ProductService {
 
     private boolean productAlreadyExist(String name, String categoryId){
         return productRepository.findByNameAndCategoryId(name, categoryId).isPresent();
+    }
+
+    private String generateTrackingId(){
+        return UUID.randomUUID().toString();
     }
 }
