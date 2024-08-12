@@ -24,3 +24,6 @@ spring:
       routes[3].id: restaurant-service
       routes[3].uri: lb://restaurant-service
       routes[3].predicates[0]: Path=/api/v1/restaurant/**
+      routes[4].id: tracking-service
+      routes[4].uri: lb://tracking-service
+      routes[4].predicates[0]: Path=/api/v1/tracking/**

@@ -28,3 +28,6 @@ topic:
   restaurant:
     name: restaurant.request.topic.v1
     group-id: restaurant-groupId
+  tracking:
+    name: tracking.request.topic.v1
+    group-id: tracking-groupId
