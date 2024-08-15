@@ -33,10 +33,11 @@ public class ProductProducer {
     @Value("${spring.application.name}")
     private String fromService;
 
-    public void sendMessageToCategory(MethodType methodType, String id, Object object, UUID restaurantId){
+    public void sendMessageToCategory(MethodType methodType, String id, Object object, UUID restaurantId, String trackingId){
         try{
             data.put("id", id);
             data.put("object", object);
+            data.put("trackingId", trackingId);
             data.put("restaurantId", restaurantId);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
@@ -45,9 +46,10 @@ public class ProductProducer {
         }
     }
 
-    public void sendMessageToCategory(MethodType methodType, Object object, UUID restaurantId){
+    public void sendMessageToCategory(MethodType methodType, Object object, UUID restaurantId, String trackingId){
         try{
             data.put("object", object);
+            data.put("trackingId", trackingId);
             data.put("restaurantId", restaurantId);
 
             kafkaTemplate.send(newTopic.name(), methodType.toString(), objectMapper.writeValueAsString(data));
@@ -61,6 +63,16 @@ public class ProductProducer {
             data.put("trackingId", trackingId);
             data.put("description", description);
             data.put("fromService", fromService);
+
+            kafkaTemplate.send("tracking.request.topic.v1", status, objectMapper.writeValueAsString(data));
+        } catch (KafkaException | JsonProcessingException e){
+            log.info("product producer error: {}", e.getMessage());
+        }
+    }
+
+    public void sendMessageToTracking(String status, String trackingId){
+        try{
+            data.put("trackingId", trackingId);
 
             kafkaTemplate.send("tracking.request.topic.v1", status, objectMapper.writeValueAsString(data));
         } catch (KafkaException | JsonProcessingException e){
