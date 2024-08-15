@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -28,17 +29,31 @@ public class UploadProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendMessageToProduct(String productId, UUID restaurantId, String urlImage){
+    @Value("${spring.application.name}")
+    private String fromService;
+
+    public void sendMessageToProduct(String productId, UUID restaurantId, String imageUrl, String trackingId){
         try{
             data.put("productId", productId);
             data.put("restaurantId", restaurantId);
-            data.put("urlImage", urlImage);
+            data.put("imageUrl", imageUrl);
+            data.put("trackingId", trackingId);
 
             kafkaTemplate.send(newTopic.name(), objectMapper.writeValueAsString(data));
-        } catch (KafkaException e){
+        } catch (KafkaException | JsonProcessingException e){
             log.info("Kafka produce error: {}", e.getMessage());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendMessageToTracking(String status, String description, String trackingId){
+        try{
+            data.put("trackingId", trackingId);
+            data.put("description", description);
+            data.put("fromService", fromService);
+
+            kafkaTemplate.send("tracking.request.topic.v1", status, objectMapper.writeValueAsString(data));
+        } catch (KafkaException | JsonProcessingException e){
+            log.info("Kafka produce error: {}", e.getMessage());
         }
     }
 }
