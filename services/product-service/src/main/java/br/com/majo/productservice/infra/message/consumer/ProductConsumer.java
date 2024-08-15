@@ -29,13 +29,13 @@ public class ProductConsumer {
     @ProductListener(topics = "${topic.category.name}")
     public void consumerFromCategory(@Header(KafkaHeaders.RECEIVED_KEY) String status, Map<String, Object> data) {
         //  CREATE, UPDATE, DELETE, UPDATE_SOLD_OUT_STATUS, UPDATE_URL_IMAGE, UPDATE_CATEGORY_ID
+        var rollbackMethod = data.get("rollback").toString();
+        var productId = data.get("productId").toString();
+
         try {
             if(status.equalsIgnoreCase("SUCCESS")){
                 log.info("SUCCESS - {}", data.get("message"));
             } else {
-                var rollbackMethod = data.get("rollback").toString();
-                var productId = data.get("productId").toString();
-
                 var lastProduct = productCacheRepository.findById(productId)
                         .orElseThrow(() -> new ProductNotFoundException("product not found"));
 
@@ -57,7 +57,7 @@ public class ProductConsumer {
                         break;
                     }
                     case "UPDATE_URL_IMAGE": {
-                        productService.updateUrlImage(lastProduct.getId(), lastProduct.getRestaurantId(), lastProduct.getUrlImage(), true);
+                        productService.updateImageUrl(lastProduct.getId(), lastProduct.getRestaurantId(), lastProduct.getImageUrl(), true, null);
                         break;
                     }
                     case "UPDATE_CATEGORY_ID": {
@@ -67,6 +67,8 @@ public class ProductConsumer {
                 }
                 log.info("There was an error in the category service and a rollback was performed");
             }
+
+            productCacheRepository.deleteById(productId);
         } catch (KafkaException e) {
             log.info("Kafka Consumer Error: {}", e.getMessage());
         }
@@ -77,9 +79,10 @@ public class ProductConsumer {
         try {
             var productId = objectMapping(data.get("productId"), String.class);
             var restaurantId = objectMapping(data.get("restaurantId"), UUID.class);
-            var urlImage = objectMapping(data.get("urlImage"), String.class);
+            var imageUrl = objectMapping(data.get("imageUrl"), String.class);
+            var trackingId = objectMapping(data.get("trackingId"), String.class);
 
-            productService.updateUrlImage(productId, restaurantId, urlImage, false);
+            productService.updateImageUrl(productId, restaurantId, imageUrl, false, trackingId);
 
         } catch (KafkaException e) {
             log.info("Kafka Consumer Error: {}", e.getMessage());
