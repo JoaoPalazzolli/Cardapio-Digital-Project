@@ -2,6 +2,7 @@ package br.com.majo.categoryservice.infra.message.producer;
 
 import br.com.majo.categoryservice.infra.utils.RollbackMethod;
 import br.com.majo.categoryservice.infra.utils.StatusMessage;
+import br.com.majo.categoryservice.infra.utils.TrackingStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -54,11 +55,11 @@ public class CategoryProducer {
         }
     }
 
-    public void sendMessageToTracking(String status, String trackingId){
+    public void sendMessageToTracking(TrackingStatus status, String trackingId){
         try{
             data.put("trackingId", trackingId);
 
-            kafkaTemplate.send("tracking.request.topic.v1", status, objectMapper.writeValueAsString(data));
+            kafkaTemplate.send("tracking.request.topic.v1", status.toString(), objectMapper.writeValueAsString(data));
         } catch (KafkaException | JsonProcessingException e){
             log.info("category producer error: {}", e.getMessage());
         }

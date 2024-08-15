@@ -40,10 +40,10 @@ public class ProductService {
 
             producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                     .format("product success added to category. (product id: (%s))", productDTO.getId()));
-            producer.sendMessageToTracking(TrackingStatus.PUBLISHED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PUBLISHED, trackingId);
             log.info("product success added to category. (product id: ({}))", productDTO.getId());
         } catch (KafkaException | CategoryNotFoundException e){
-            producer.sendMessageToTracking(TrackingStatus.FAILED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
             producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.CREATE, productDTO.getId());
             log.info("Error -> {}", e.getMessage());
         }
@@ -64,10 +64,10 @@ public class ProductService {
 
             producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                     .format("success updated product in category. (product id: (%s))", productDTO.getId()));
-            producer.sendMessageToTracking(TrackingStatus.PUBLISHED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PUBLISHED, trackingId);
             log.info("success updated product in category. (product id: ({}))", productDTO.getId());
         } catch (KafkaException | CategoryNotFoundException e){
-            producer.sendMessageToTracking(TrackingStatus.FAILED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
             producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE, productDTO.getId());
             log.info("Error -> {}", e.getMessage());
         }
@@ -85,10 +85,10 @@ public class ProductService {
 
             producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                     .format("success deleted product in category. (product id: (%s))", productDTO.getId()));
-            producer.sendMessageToTracking(TrackingStatus.PUBLISHED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PUBLISHED, trackingId);
             log.info("success deleted product in category. (product id: ({}))", productDTO.getId());
         } catch (KafkaException | CategoryNotFoundException e){
-            producer.sendMessageToTracking(TrackingStatus.FAILED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
             producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.DELETE, productDTO.getId());
             log.info("Error -> {}", e.getMessage());
         }
@@ -108,10 +108,10 @@ public class ProductService {
 
             producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                     .format("sold out status has been updated successfully. (product id: (%s))", productId));
-            producer.sendMessageToTracking(TrackingStatus.PUBLISHED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PUBLISHED, trackingId);
             log.info("sold out status has been updated successfully. (product id: ({}))", productId);
         } catch (KafkaException | CategoryNotFoundException e){
-            producer.sendMessageToTracking(TrackingStatus.FAILED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
             producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE_SOLD_OUT_STATUS, productId);
             log.info("Error -> {}", e.getMessage());
         }
@@ -130,10 +130,10 @@ public class ProductService {
 
             producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                     .format("image url has been updated successfully. (product id: (%s))", productId));
-            producer.sendMessageToTracking(TrackingStatus.PUBLISHED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PUBLISHED, trackingId);
             log.info("image url has been updated successfully. (product id: ({}))", productId);
         } catch (KafkaException | CategoryNotFoundException e){
-            producer.sendMessageToTracking(TrackingStatus.FAILED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
             producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE_URL_IMAGE, productId);
             log.info("Error -> {}", e.getMessage());
         }
@@ -148,7 +148,7 @@ public class ProductService {
 
             var targetCategory = categoryRepository.findByIdAndRestaurantId(categoryId, restaurantId)
                     .orElseThrow(() -> {
-                        producer.sendMessageToTracking(TrackingStatus.FAILED.toString(), trackingId);
+                        producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
                         producer.sendMessageToProduct(StatusMessage.FAILED, "category not found");
                         return new CategoryNotFoundException("Category not found");
                     });
@@ -164,10 +164,10 @@ public class ProductService {
 
             producer.sendMessageToProduct(StatusMessage.SUCCESS, String
                     .format("product category has been updated successfully. (product id: (%s))", productDTO.getId()));
-            producer.sendMessageToTracking(TrackingStatus.PUBLISHED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PUBLISHED, trackingId);
             log.info("product category has been updated successfully. (product id: ({}))", productDTO.getId());
         } catch (KafkaException | CategoryNotFoundException e){
-            producer.sendMessageToTracking(TrackingStatus.FAILED.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
             producer.sendMessageToProduct(StatusMessage.FAILED, RollbackMethod.UPDATE_CATEGORY_ID, productDTO.getId());
             log.info("Error -> {}", e.getMessage());
         }
