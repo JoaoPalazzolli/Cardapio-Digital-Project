@@ -31,7 +31,7 @@ public class ProductCacheService {
 
         if (object instanceof Boolean) lastProduct.setSoldOut((Boolean) object);
 
-        if (object instanceof String) lastProduct.setUrlImage((String) object);
+        if (object instanceof String) lastProduct.setImageUrl((String) object);
 
         productCacheRepository.save(lastProduct);
 
