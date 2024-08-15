@@ -53,4 +53,14 @@ public class CategoryProducer {
             log.info("category producer error: {}", e.getMessage());
         }
     }
+
+    public void sendMessageToTracking(String status, String trackingId){
+        try{
+            data.put("trackingId", trackingId);
+
+            kafkaTemplate.send("tracking.request.topic.v1", status, objectMapper.writeValueAsString(data));
+        } catch (KafkaException | JsonProcessingException e){
+            log.info("category producer error: {}", e.getMessage());
+        }
+    }
 }
