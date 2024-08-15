@@ -68,7 +68,7 @@ public class CategoryConsumer {
                     break;
                 }
                 case "UPDATE_URL_IMAGE":{
-                    log.info("url image being updated to the category");
+                    log.info("image url being updated to the category");
 
                     productService.updateImageUrlInCategory(id, objectMapping(object, String.class), restaurantId, trackingId);
                     break;
