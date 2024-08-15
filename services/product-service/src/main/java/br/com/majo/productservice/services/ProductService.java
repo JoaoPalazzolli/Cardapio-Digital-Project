@@ -154,14 +154,14 @@ public class ProductService {
 
     public void updateImageUrl(String id, UUID restaurantId, String imageUrl, Boolean isRollback, String trackingId){
 
-        productRepository.updateUrlImage(id, restaurantId, imageUrl);
+        productRepository.updateImageUrl(id, restaurantId, imageUrl);
 
         productCacheService.saveLastVersion(id, imageUrl, restaurantId);
 
         if(!isRollback){
             producer.sendMessageToTracking("PROCESSING", trackingId);
             producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, imageUrl, restaurantId, trackingId);
-            log.info("url image has been updated success. (product id: ({}))", id);
+            log.info("image url has been updated success. (product id: ({}))", id);
         }
     }
 
