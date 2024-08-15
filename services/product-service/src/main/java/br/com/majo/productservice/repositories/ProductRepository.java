@@ -20,7 +20,7 @@ public interface ProductRepository extends MongoRepository<ProductDomain, String
 
     @Query("{ 'id': ?0, 'restaurantId': ?1 }")
     @Update("{ '$set': { 'urlImage': ?2 }}")
-    void updateUrlImage(String id, UUID restaurantId, String urlImage);
+    void updateImageUrl(String id, UUID restaurantId, String urlImage);
 
     @Query("{ 'id': ?0, 'restaurantId': ?1 }")
     @Update("{ '$set': { 'categoryId': ?2 }}")
