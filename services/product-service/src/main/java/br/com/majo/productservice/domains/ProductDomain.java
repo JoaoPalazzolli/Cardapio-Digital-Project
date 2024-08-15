@@ -33,8 +33,8 @@ public class ProductDomain implements Serializable {
 
     private BigDecimal price;
 
-    @Field(name = "url_image")
-    private String urlImage;
+    @Field(name = "image_url")
+    private String imageUrl;
 
     @Field(name = "sold_out")
     private Boolean soldOut;

@@ -23,7 +23,7 @@ public class ProductDTO extends RepresentationModel<ProductDTO> implements Seria
     private String name;
     private String description;
     private BigDecimal price;
-    private String urlImage;
+    private String imageUrl;
     private Boolean soldOut;
     private Date createAt;
 
