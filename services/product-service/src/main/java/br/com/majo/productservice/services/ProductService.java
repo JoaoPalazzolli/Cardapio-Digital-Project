@@ -75,7 +75,7 @@ public class ProductService {
             var trackingId = generateTrackingId();
             dto.setTrackingId(trackingId);
             producer.sendMessageToTracking("PENDING", "Publishing a Product", trackingId);
-            producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId());
+            producer.sendMessageToCategory(MethodType.CREATE, productDTO.getCategoryId(), dto, dto.getRestaurantId(), trackingId);
             log.info("Success created product. (product id: ({}))", dto.getId());
         }
 
@@ -96,7 +96,7 @@ public class ProductService {
 
         productDTO.setCreateAt(product.getCreateAt());
         productDTO.setCategoryId(product.getCategoryId());
-        productDTO.setUrlImage(product.getUrlImage());
+        productDTO.setImageUrl(product.getImageUrl());
         productDTO.setSoldOut(product.getSoldOut());
         productDTO.setId(id);
         product = Mapper.parseObject(productDTO, ProductDomain.class);
@@ -108,11 +108,11 @@ public class ProductService {
             var trackingId = generateTrackingId();
             dto.setTrackingId(trackingId);
             producer.sendMessageToTracking("PENDING", "Updating a Product", trackingId);
-            producer.sendMessageToCategory(MethodType.UPDATE, dto, dto.getRestaurantId());
+            producer.sendMessageToCategory(MethodType.UPDATE, dto, dto.getRestaurantId(), trackingId);
             log.info("Success updated product. (product id: ({}))", id);
         }
 
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(dto);
     }
 
     public ResponseEntity<?> deleteProduct(String id, UUID restaurantId, Boolean isRollback){
@@ -124,14 +124,15 @@ public class ProductService {
 
         productRepository.delete(product);
 
+        var trackingId = generateTrackingId();
+
         if(!isRollback){
-            var trackingId = generateTrackingId();
             producer.sendMessageToTracking("PENDING", "Deleting a Product", trackingId);
-            producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId);
+            producer.sendMessageToCategory(MethodType.DELETE, product, restaurantId, trackingId);
             log.info("Success deleted product. (product id: ({}))", id);
         }
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(trackingId);
     }
 
     public ResponseEntity<?> updateSoldOut(String id, UUID restaurantId, Boolean soldOut, Boolean isRollback){
@@ -140,27 +141,26 @@ public class ProductService {
 
         productCacheService.saveLastVersion(id, soldOut, restaurantId);
 
+        var trackingId = generateTrackingId();
+
         if(!isRollback){
-            var trackingId = generateTrackingId();
             producer.sendMessageToTracking("PENDING", "Updating the Sold Out Status", trackingId);
-            producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId);
+            producer.sendMessageToCategory(MethodType.UPDATE_SOLD_OUT_STATUS, id, soldOut, restaurantId, trackingId);
             log.info("sold out status has been updated success. (product id: ({}))", id);
         }
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(trackingId);
     }
 
-    public void updateUrlImage(String id, UUID restaurantId, String urlImage, Boolean isRollback){
+    public void updateImageUrl(String id, UUID restaurantId, String imageUrl, Boolean isRollback, String trackingId){
 
-        productRepository.updateUrlImage(id, restaurantId, urlImage);
+        productRepository.updateUrlImage(id, restaurantId, imageUrl);
 
-        productCacheService.saveLastVersion(id, urlImage, restaurantId);
+        productCacheService.saveLastVersion(id, imageUrl, restaurantId);
 
-        // inicia em upload e termina em category --- ajustar os producer e consumer
-        // possivel alteração para todos não alterarem mais void e sim pelo menos o ID de monitoramento...
         if(!isRollback){
-            producer.sendMessageToTracking("PENDING", "Updating the Product Image", generateTrackingId());
-            producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, urlImage, restaurantId);
+            producer.sendMessageToTracking("PROCESSING", trackingId);
+            producer.sendMessageToCategory(MethodType.UPDATE_URL_IMAGE, id, imageUrl, restaurantId, trackingId);
             log.info("url image has been updated success. (product id: ({}))", id);
         }
     }
@@ -174,15 +174,16 @@ public class ProductService {
 
         productRepository.updateCategoryId(productId, restaurantId, categoryId);
 
+        var trackingId = generateTrackingId();
+
         if(!isRollback){
-            var trackingId = generateTrackingId();
             producer.sendMessageToTracking("PENDING", "Updating the Category of Product", trackingId);
             producer.sendMessageToCategory(MethodType.UPDATE_CATEGORY_ID, categoryId,
-                    Mapper.parseObject(product, ProductDTO.class), restaurantId);
+                    Mapper.parseObject(product, ProductDTO.class), restaurantId, trackingId);
             log.info("category has been updated success. (product id: ({}))", productId);
         }
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(trackingId);
     }
 
     public ResponseEntity<List<ProductDTO>> findAllByRestaurant(UUID restaurantId) {
