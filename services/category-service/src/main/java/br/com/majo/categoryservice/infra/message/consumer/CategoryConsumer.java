@@ -40,7 +40,7 @@ public class CategoryConsumer {
             var object = data.get("object");
             var restaurantId = objectMapping(data.get("restaurantId"), UUID.class);
 
-            producer.sendMessageToTracking(TrackingStatus.PROCESSING.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PROCESSING, trackingId);
 
             switch (methodType){
                 case "CREATE":{
@@ -85,7 +85,7 @@ public class CategoryConsumer {
             }
 
         } catch (KafkaException e){
-            producer.sendMessageToTracking(TrackingStatus.PROCESSING.toString(), trackingId);
+            producer.sendMessageToTracking(TrackingStatus.PROCESSING, trackingId);
             log.info("Kafka Consumer Error: {}", e.getMessage());
         }
     }
