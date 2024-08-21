@@ -85,7 +85,7 @@ public class CategoryConsumer {
             }
 
         } catch (KafkaException e){
-            producer.sendMessageToTracking(TrackingStatus.PROCESSING, trackingId);
+            producer.sendMessageToTracking(TrackingStatus.FAILED, trackingId);
             log.info("Kafka Consumer Error: {}", e.getMessage());
         }
     }
